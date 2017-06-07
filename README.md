@@ -12,13 +12,13 @@ Phase 1: Problem Framing - Complete
 - Outline approach and data pipeline  
 - **Work product:** Clear project objective
 
-Phase 2: Data Munging - Current
+Phase 2: Data Munging - Complete (may revisit)
 - Determine strategy for missing values
 - Select initial features and identify areas of data sparsity
 - Subset data into user matrix form  
 - **Work product:** Dense data frame suitable for EDA and modeling
 
-Phase 3: EDA and Modeling
+Phase 3: EDA and Modeling - Current
 - Apply unsupervised clustering algorithms to data frame
 - Visualize data subsets to identify trends
 - Identify additional data sources to incorporate into model  
@@ -26,8 +26,8 @@ Phase 3: EDA and Modeling
 
 Phase 4: Final Model and Feature Importance
 - Run k-prototypes and/or k-modes clustering clustering algorithms
-- Produce dendrograms, scree plots, and 2-d PCA for cluster presentation
-- Use dimensionality reduction methods to extract feature importance  
+- Select the proper number of clusters based on silhouette scoreing
+- Explore visualization and feature importance methods for categorical datasets (e.g. Multiple Correspondence Analysis)
 - **Work product:** Working model with supporting visualizations to infer business intelligence
 
 Phase 5: Web Application and Presentation
