@@ -1,21 +1,25 @@
-from sklearn.metrics import silhouette_samples, silhouette_score
-from sklearn.metrics import jaccard_similarity_score
-from sklearn.metrics.pairwise import pairwise_distances
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+from sklearn.metrics import silhouette_samples, silhouette_score
+from sklearn.metrics.pairwise import pairwise_distances
 from kmodes import kmodes, kprototypes
-import pdb
 from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.mixture import GaussianMixture
+from homer_cluster import one_hot, prep_kmodes
+import pdb
+
 
 def cluster_and_plot(X, n_clusters, model='AG', title='users'):
+    '''
+    X: must be dense array or pandas dataframe
+    '''
     fig = plt.figure(figsize=(8,6))
     ax = fig.add_subplot(111)
 
     ax.set_xlim([-0.6, 1])
-    # The (n_clusters+1)*10 is for inserting blank space between silhouette plots of individual clusters, to demarcate them clearly.
+    # Insert blank space between silhouette plots of individual clusters
     ax.set_ylim([0, len(X) + (n_clusters + 1) * 10])
 
     # Initialize clusterer and set random state, if possible
@@ -31,13 +35,8 @@ def cluster_and_plot(X, n_clusters, model='AG', title='users'):
         clusterer = GaussianMixture(n_components=n_clusters, covariance_type='tied', max_iter=20, n_init=50, random_state=42, verbose=1).fit(X)
         labels = clusterer.predict(X)
 
-    # The silhouette_score gives the average value for all the samples.
-    # This gives a perspective into the density and separation of the formed clusters
+    # Compute the silhouette score (average value for all the samples) and the silhoutte score for each sample
     silhouette_avg = silhouette_score(X, labels, metric='hamming')
-
-    print('For n_clusters = {} the average silhouette_score is: {}'.format(n_clusters, silhouette_avg))
-
-    # Compute the silhouette scores for each sample
     sample_silhouette_values = silhouette_samples(X, labels, metric='hamming')
 
     y_lower = 10
@@ -64,7 +63,7 @@ def cluster_and_plot(X, n_clusters, model='AG', title='users'):
     ax.set_xlabel('The silhouette coefficient values')
     ax.set_ylabel('Cluster label')
 
-    # The vertical line for average silhoutte score of all the values
+    # Add a vertical line for average silhoutte score of all values
     ax.axvline(x=silhouette_avg, color='red', linestyle='--')
 
     ax.set_yticks([])  # Clear the yaxis labels / ticks
@@ -76,20 +75,25 @@ def cluster_and_plot(X, n_clusters, model='AG', title='users'):
     plt.close()
 
 def get_silhouette_score(X, n_clusters, model='AG'):
+    '''
+    X: must be dense array or pandas dataframe
+    '''
     # Initialize clusterer and set random state, if possible
     if model == 'AG':
         clusterer = AgglomerativeClustering(n_clusters=n_clusters, affinity='cosine', linkage='average').fit(X)
         labels = clusterer.labels_
+        sil_avg = silhouette_score(X, labels, metric='hamming')
 
     elif model == 'KM':
         clusterer = kmodes.KModes(n_clusters=n_clusters, n_init=5, init='Huang', verbose=1)
         labels = clusterer.fit_predict(X)
+        sil_avg = silhouette_score(X, labels, metric='hamming')
 
     elif model == 'GM':
         clusterer = GaussianMixture(n_components=n_clusters, covariance_type='tied', max_iter=20, n_init=50, random_state=42, verbose=1).fit(X)
         labels = clusterer.predict(X)
+        sil_avg = silhouette_score(X, labels, metric='hamming')
 
-    sil_avg = silhouette_score(X, labels, metric='hamming')
     return sil_avg
 
 def plot_sil_scores(X, model, title='users'):
@@ -104,3 +108,21 @@ def plot_sil_scores(X, model, title='users'):
 
     plt.savefig('img/silhouette/sil_v_clust_{}_{}.png'.format(model, title), dpi=200)
     plt.close()
+
+if __name__ == '__main__':
+    plt.close('all')
+    df = pd.read_pickle('data/df.pkl')
+    df_users = pd.read_pickle('data/df_users.pkl')
+
+    df_users_km = prep_kmodes(df_users)
+    df_km = prep_kmodes(df)
+
+    X = one_hot(df)
+    X_users = one_hot(df_users)
+
+    # for i in range(3, 9):
+        # cluster_and_plot(df_users_km, n_clusters=i, model='KM')
+        # cluster_and_plot(X_users.toarray(), n_clusters=i, model='AG')
+
+    # plot_sil_scores(df_users_km, model='KM')
+    # plot_sil_scores(X_users.toarray(), model='AG')

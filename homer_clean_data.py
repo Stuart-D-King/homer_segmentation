@@ -6,13 +6,13 @@ import itertools
 import requests
 import reverse_geocoder as rg
 import xml.etree.ElementTree as ET
+from collections import defaultdict
 
 def read_data():
     df = pd.read_csv('data/combined_grid_and_run_data.csv', encoding='iso-8859-1')
 
     cols = ['UserRole',
             'OrganizationType',
-            'Sample',
             'Latitude',
             'Longitude',
             'User',
@@ -23,7 +23,14 @@ def read_data():
             'Pv0CostTable',
             'ConverterCostTable',
             'ImportedWind',
-            'ImportedSolar']
+            'ImportedSolar',
+            'Electric1Peak',
+            'Generator0Capital',
+            'Battery0Capital',
+            'WindTurbine0Capital',
+            'Pv0Capital',
+            'Generator0'
+            ]
 
     df = df[cols]
 
@@ -47,10 +54,25 @@ def read_data():
     df['OrganizationType'] = df['OrganizationType'].replace(['Academic Institution or Research Center'], 'Academic')
     df['OrganizationType'] = df['OrganizationType'].replace(['Other Professional Services Company', 'Finance Organization'], 'Service')
 
+    # set 'OrganizationType' as category type
     df['OrganizationType'] = df['OrganizationType'].astype('category')
 
-    # clean 'Sample'; if a sample is used = True, else = False
-    df['Sample'] = np.where(df['Sample'].notnull(), True, False)
+    print('Creating new columns...')
+    # create new 'ElectDefault' column
+    df['ElectricNotDefault'] = df['Electric1Peak'].apply(lambda x: isinstance(x, float) and x != 0 and x < 1000000)
+
+    # create new 'GeneratorDefault' column
+    df['GeneratorNotDefault'] = np.where(df['Generator0'] == 'Autosize Genset', False, True)
+
+    # create new capital cost columns to see if a user input a value or not
+    df['GenCapCost'] = np.where(df['Generator0Capital'] != 0, True, False)
+    df['BatCapCost'] = np.where(df['Battery0Capital'] != 0, True, False)
+    df['WindCapCost'] = np.where(df['WindTurbine0Capital'] != 0, True, False)
+    df['PvCapCost'] = np.where(df['Pv0Capital'] != 0, True, False)
+
+    # drop columns no longer needed
+    for table in ['Electric1Peak', 'Generator0', 'Generator0Capital', 'Battery0Capital', 'WindTurbine0Capital', 'Pv0Capital']:
+        df.drop(table, axis=1, inplace=True)
 
     # clean latitude and longitude columns
     # will look into 'geopy' to see if I can impute coordinates for simulaitons without latitude and longitude
@@ -69,7 +91,6 @@ def read_data():
     # drop any Users with IDs whose length is not 6
     df = df[df['User'].map(len) == 6]
 
-    print('Creating new boolean columns...')
     # create boolean columns of if a cost table has multiple lines
     cost_tables = ['Generator0CostTable', 'WindTurbine0CostTable', 'Battery0CostTable', 'Pv0CostTable', 'ConverterCostTable']
     costs = ['Gen', 'Wind', 'Bat', 'Pv', 'Con']
@@ -82,7 +103,7 @@ def read_data():
 
     print('Converting booleans to integers...')
     # convert boolean columns to int type
-    bool_cols = ['Sample', 'ImportedWind', 'ImportedSolar', 'GenCostMultiLines', 'WindCostMultiLines', 'BatCostMultiLines', 'PvCostMultiLines', 'ConCostMultiLines']
+    bool_cols = ['ImportedWind', 'ImportedSolar', 'GenCostMultiLines', 'WindCostMultiLines', 'BatCostMultiLines', 'PvCostMultiLines', 'ConCostMultiLines', 'ElectricNotDefault', 'GeneratorNotDefault', 'GenCapCost', 'BatCapCost', 'WindCapCost', 'PvCapCost']
 
     for col in bool_cols:
         if df[col].dtype != bool:
@@ -115,9 +136,6 @@ def score_rows(df):
             score += 1
         elif row['OrganizationType'] == 'Academic':
             score -= 1
-
-        if row['Sample'] == 1:
-            score += 1
 
         if row['ImportedWind'] == 1:
             score += 1
@@ -154,7 +172,7 @@ def create_user_df(df):
     :param df: dataframe to build new dataframe
     :returns: created user dataframe
     '''
-    df.dropna(axis=0, how='any', inplace=True)
+    # df.dropna(axis=0, how='any', inplace=True)
 
     # group by user
     users = df.groupby('User')
@@ -170,26 +188,51 @@ def create_user_df(df):
     # using the mode for each column from the full data frame, add column values to each new column created in user dataframe
     cols = ['UserRole',
             'OrganizationType',
-            'Sample',
             'Latitude',
             'Longitude',
             'ImportedWind',
             'ImportedSolar',
+            'ElectricNotDefault',
+            'GeneratorNotDefault',
+            'GenCapCost',
+            'BatCapCost',
+            'WindCapCost',
+            'PvCapCost',
             'GenCostMultiLines',
             'WindCostMultiLines',
             'BatCostMultiLines',
             'PvCostMultiLines',
-            'ConCostMultiLines',
+            'ConCostMultiLines'
             ]
 
     for col in cols:
         df_users[col] = users[col].agg(lambda x: x.value_counts().index[0]).values
 
-    df['UserRole'] = df['UserRole'].astype('category')
-    df['OrganizationType'] = df['OrganizationType'].astype('category')
+    # change dtype of 'UserRole' and 'OrganizationType' to category
+    df_users['UserRole'] = df_users['UserRole'].astype('category')
+    df_users['OrganizationType'] = df_users['OrganizationType'].astype('category')
 
+    # to cacluate the number of changed inputs
+    input_cols = ['ImportedWind',
+                'ImportedSolar',
+                'ElectricNotDefault',
+                'GeneratorNotDefault',
+                'GenCapCost',
+                'BatCapCost',
+                'WindCapCost',
+                'PvCapCost',
+                'GenCostMultiLines',
+                'WindCostMultiLines',
+                'BatCostMultiLines',
+                'PvCostMultiLines',
+                'ConCostMultiLines'
+                ]
+
+    # create 'NumChangedInputs' column = sums all true values in boolean columns
+    df_users['NumChangedInputs'] = df_users[input_cols].sum(axis=1)
     # df_users['Score'] = users['Score'].mean().values
 
+    # remove outliers and reset index in 'NumSims' column
     # df_users = remove_outliers(df_users)
 
     return df_users
@@ -208,31 +251,23 @@ def add_cc(df):
         countries.append(r['cc'])
 
     df['Country'] = countries
-
     return df
 
-def remove_outliers(df):
-    outliers_lst  = []
-    contin_cols = ['NumSims']
-    for feature in contin_cols:
-        Q1 = np.percentile(df.loc[:, feature], 25)
-        Q3 = np.percentile(df.loc[:, feature], 75)
+def remove_outliers(df_):
+    df = df_.copy()
 
-        # Use the interquartile range to calculate an outlier step (1.5 times the interquartile range)
-        step = 1.5 * (Q3 - Q1)
+    Q1 = np.percentile(df.loc[:, 'NumSims'], 25)
+    Q3 = np.percentile(df.loc[:, 'NumSims'], 75)
 
-        # Find any points outside of Q1 - step and Q3 + step
-        outliers_rows = df.loc[~((df[feature] >= Q1 - step) & (df[feature] <= Q3 + step)), :]
+    # Use the interquartile range to calculate an outlier step (1.5 times the interquartile range)
+    step = 1.5 * (Q3 - Q1)
 
-        outliers_lst.append(list(outliers_rows.index))
+    # Find any points outside of Q1 - step and Q3 + step
+    outliers_rows = df.loc[~((df['NumSims'] >= Q1 - step) & (df['NumSims'] <= Q3 + step)), :]
 
-    outliers = list(itertools.chain.from_iterable(outliers_lst))
-    # List of duplicate outliers
-    dup_outliers = list(set([x for x in outliers if outliers.count(x) > 1]))
-    # Remove duplicate outliers
-    good_df = df.drop(df.index[dup_outliers]).reset_index(drop=True)
+    clean_df = df.drop(df.index[outliers_rows.index.tolist()]).reset_index(drop=True)
 
-    return good_df
+    return clean_df
 
 def get_fips_codes(df):
     df = df[df['Country'] == 'US']
@@ -247,30 +282,54 @@ def get_fips_codes(df):
         try:
             fips_codes.append(root[1].attrib['FIPS'])
         except:
-            fips_codes.append('NA')
+            fips_codes.append(0)
 
     df['FIPS'] = fips_codes
+
+    df.reset_index(drop=True, inplace=True)
+    # df = remove_outliers(df)
 
     return df
 
 if __name__ == '__main__':
     # ---Create dataframes---
-    df = read_data()
-    df = add_cc(df)
-    # scores = score_rows(df)
-    # df['Score'] = scores
-    df_users = create_user_df(df)
-    df_users = add_cc(df_users)
+    # df = read_data()
+    # df = add_cc(df)
+    # df['Score'] = score_rows(df)
+    # df_users = create_user_df(df)
+    # df_users = add_cc(df_users)
 
     # ---Pickle dataframes---
-    df.to_pickle('data/df.pkl')
-    df_users.to_pickle('data/df_users.pkl')
+    # df.to_pickle('data/df.pkl')
+    # df_users.to_pickle('data/df_users.pkl')
 
     # ---Read back in pickled dataframes---
-    # df = pd.read_pickle('data/new_full_df.pkl')
-    # df_users = pd.read_pickle('data/new_user_df.pkl')
+    # df = pd.read_pickle('data/df.pkl')
+    # df_users = pd.read_pickle('data/df_users.pkl')
 
-    # --Create USA dataframe with FIPS codes---
-    # df_usa = get_fips_codes(df_users)
-    # df_usa.to_pickle('data/usa_df.pkl')
-    # df_usa = pd.read_pickle('data/usa_df.pkl')
+    # AFTER CLUSTERING
+    # ---Read in clustered dataframes---
+    df_clustered = pd.read_pickle('data/df_clustered.pkl')
+    df_users_clustered = pd.read_pickle('data/df_users_clustered.pkl')
+
+    # ---Create USA dataframe with FIPS codes---
+    df_usa = get_fips_codes(df_clustered)
+    df_users_usa = get_fips_codes(df_users_clustered)
+
+    # ---Pickle USA dataframes---
+    df_usa.to_pickle('data/df_usa.pkl')
+    df_users_usa.to_pickle('data/df_users_usa')
+
+    # ---Read back in pickled USA dataframes---
+    # df_usa = pd.read_pickle('data/df_usa.pkl')
+    # df_users_usa = pd.read_pickle('data/df_users_usa.pkl')
+
+    # ---Create user and full dataframe country dictionaries---
+    # country_dct = defaultdict(list)
+    # for idx, country in enumerate(df_clustered['Country']):
+    #     country_dct[country].append(idx)
+
+    # user_country_dct = defaultdict(list)
+    # for idx, country in enumerate(df_users_clustered['Country']):
+    #     user_country_dct[country].append(idx)
+    #

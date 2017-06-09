@@ -8,11 +8,10 @@ import matplotlib.cm as cm
 import mca
 import pickle
 import pdb
-from homer_silhouette import cluster_and_plot, plot_sil_scores
 from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.mixture import GaussianMixture
 from sklearn.manifold import TSNE
-from sklearn.neighbors import kneighbors_graph
+from sklearn.metrics.pairwise import pairwise_distances
 
 
 def one_hot(df_):
@@ -20,7 +19,6 @@ def one_hot(df_):
 
     cols_to_keep = ['UserRole',
                     'OrganizationType',
-                    'Sample',
                     'ImportedWind',
                     'ImportedSolar',
                     'GenCostMultiLines',
@@ -28,6 +26,12 @@ def one_hot(df_):
                     'BatCostMultiLines',
                     'PvCostMultiLines',
                     'ConCostMultiLines',
+                    'ElectricNotDefault',
+                    'GeneratorNotDefault',
+                    'GenCapCost',
+                    'BatCapCost',
+                    'WindCapCost',
+                    'PvCapCost'
                     ]
 
     df = df[cols_to_keep]
@@ -54,7 +58,8 @@ def one_hot(df_):
 
 def run_mca(X):
     mca_ben = mca.MCA(X)
-    return mca_ben
+    X = mca_ben.fs_r(1)
+    return mca_ben, X
 
 def run_tsne(X):
     model = TSNE(n_components=6, method='exact', random_state=0)
@@ -72,7 +77,6 @@ def prep_kproto(df_):
     cols_to_keep = ['NumSims',
                     'UserRole',
                     'OrganizationType',
-                    'Sample',
                     'ImportedWind',
                     'ImportedSolar',
                     'GenCostMultiLines',
@@ -80,12 +84,20 @@ def prep_kproto(df_):
                     'BatCostMultiLines',
                     'PvCostMultiLines',
                     'ConCostMultiLines',
+                    'ElectricNotDefault',
+                    'GeneratorNotDefault',
+                    'GenCapCost',
+                    'BatCapCost',
+                    'WindCapCost',
+                    'PvCapCost',
+                    'NumChangedInputs'
                     ]
 
     df = df[cols_to_keep]
 
     # convert 1/0 int columns to boolen type
-    bool_cols = ['Sample', 'ImportedWind', 'ImportedSolar', 'GenCostMultiLines', 'WindCostMultiLines', 'BatCostMultiLines', 'PvCostMultiLines', 'ConCostMultiLines']
+    bool_cols = ['ImportedWind', 'ImportedSolar', 'GenCostMultiLines', 'WindCostMultiLines', 'BatCostMultiLines', 'PvCostMultiLines', 'ConCostMultiLines', 'ElectricNotDefault', 'GeneratorNotDefault', 'GenCapCost', 'BatCapCost', 'WindCapCost', 'PvCapCost']
+
     for col in bool_cols:
         df[col] = df[col].astype(bool)
 
@@ -107,7 +119,6 @@ def prep_kmodes(df_):
 
     cols_to_keep = ['UserRole',
                     'OrganizationType',
-                    'Sample',
                     'ImportedWind',
                     'ImportedSolar',
                     'GenCostMultiLines',
@@ -115,6 +126,12 @@ def prep_kmodes(df_):
                     'BatCostMultiLines',
                     'PvCostMultiLines',
                     'ConCostMultiLines',
+                    'ElectricNotDefault',
+                    'GeneratorNotDefault',
+                    'GenCapCost',
+                    'BatCapCost',
+                    'WindCapCost',
+                    'PvCapCost'
                     ]
 
     df = df[cols_to_keep]
@@ -135,15 +152,15 @@ def prep_kmodes(df_):
 
     return df
 
-def kproto_cluster(X, cat_cols, init_method='Huang', n_clusters=4):
+def run_kproto(X, cat_cols, init_method='Cao', n_clusters=5):
     kp = kprototypes.KPrototypes(n_clusters=n_clusters, init=init_method, n_init=5, max_iter=5, verbose=2)
     labels = kp.fit_predict(X, categorical=cat_cols)
-    return labels
+    return kp, labels
 
-def kmodes_cluster(X, init_method='Huang', n_clusters=4):
+def run_kmodes(X, init_method='Huang', n_clusters=5):
     km = kmodes.KModes(n_clusters=n_clusters, n_init=5, init=init_method, verbose=1)
     labels = km.fit_predict(X)
-    return labels
+    return km, labels
 
 def plot_clusters(X, labels, n_clusters=4):
     fig = plt.figure(figsize=(8, 6))
@@ -152,7 +169,7 @@ def plot_clusters(X, labels, n_clusters=4):
     colors = cm.spectral(labels.astype(float) / n_clusters)
     ax.scatter(X[:, 0], X[:, 1], marker='.', s=30, lw=0, alpha=0.7, c=colors)
 
-    plt.savefig('img/pca_clusters.png'.format(n_clusters), dpi=200)
+    plt.savefig('img/plotted_clusters.png'.format(n_clusters), dpi=200)
     plt.close()
 
 
@@ -162,69 +179,44 @@ if __name__ == '__main__':
     df = pd.read_pickle('data/df.pkl')
     df_users = pd.read_pickle('data/df_users.pkl')
 
-    # CLUSTER AND APPEND LABELS TO USER DATASET
+    # ---KModes---
+    df_users_km = prep_kmodes(df_users)
+    km_model, km_labels = run_kmodes(df_users_km)
+
+    # ---Append lables to dataframe and pickle---
+    df_users['KM_Cluster'] = km_labels
+
+    # ---Map cluster labels to full dataframe---
+    keys = df_users['UserId'].tolist()
+    values = df_users['KM_Cluster'].tolist()
+    user_cluster_dct = dict(zip(keys, values))
+    df['KM_Cluster'] = df['User'].map(user_cluster_dct)
+
+    # ---Pickle clustered dataframes and KModes model---
+    df_users.to_pickle('data/df_users_clustered.pkl')
+    df.to_pickle('data/df_clustered.pkl')
+
+    with open('data/km_model.pkl', 'wb') as f:
+        pickle.dump(km_model, f)
+
+    # ---Finally, read back in dataframes with cluster labels---
+    df_clustered = pd.read_pickle('data/df_clustered.pkl')
+    df_users_clustered = pd.read_pickle('data/df_users_clustered.pkl')
+
+
+    # EXTRA STUFF
     # ---One Hot Encode---
-    X_users = one_hot(df_users)
+    # X_users = one_hot(df_users)
 
     # ---Gaussian Mixture---
     # gm = GaussianMixture(n_components=4, covariance_type='tied', max_iter=20, n_init=50, random_state=42, verbose=1)
     # gm.fit(X_users.todense())
-    # gm_labels_users = gm.predict(X_users.todense())
-
-    # ---KModes---
-    # df_users_km = prep_kmodes(df_users)
-    # km_labels_users = kmodes_cluster(df_users_km)
+    # gm_labels = gm.predict(X_users.todense())
 
     # ---Agglomerative Clustering---
     # ag = AgglomerativeClustering(n_clusters=4, affinity='cosine', linkage='average')
-    # ag_labels_users = ag.fit_predict(X_users.todense())
+    # ag_labels = ag.fit_predict(X_users.todense())
 
     # ---Append lables to dataframe and pickle---
-    # df_users['GM_Cluster'] = gm_labels_users
-    # df_users['KM_Cluster'] = km_labels_users
-    # df_users['AG_Cluster'] = ag_labels_users
-
-    # df_users.to_pickle('data/user_df_clustered.pkl')
-
-    # CLUSTER AND APPEND LABELS TO FULL DATASET
-    # ---One Hot Encode---
-    X = one_hot(df)
-
-    # ---Gaussian Mixture---
-    # gm = GaussianMixture(n_components=4, covariance_type='tied', max_iter=20, n_init=30, random_state=42, verbose=1)
-    # gm.fit(X.todense())
-    # gm_labels = gm.predict(X.todense())
-
-    # ---KModes---
-    # df_km = prep_kmodes(df)
-    # km_labels = kmodes_cluster(df_km)
-
-    # ---Agglomerative Clustering--- (Need to run this on AWS)
-    # ag = AgglomerativeClustering(n_clusters=4, affinity='cosine', linkage='average')
-    # ag_labels = ag.fit_predict(X.todense())
-
-    # ---Append lables to dataframe and pickle---
-    # df['GM_Cluster'] = gm_labels
-    # df['KM_Cluster'] = km_labels
-    # df['AG_Cluster'] = ag_labels # unable to do AG; not enough RAM
-
-    # df.to_pickle('data/df_clustered.pkl')
-
-    # CREATE SILHOUETTE PLOTS
-    # Silhouette plots for user clustered data
-    # for i in range(3,9):
-    #     for mod in ['AG', 'KM', 'GM']:
-    #         cluster_and_plot(X_users.todense(), n_clusters=i, model=mod)
-
-    # See how silhouette score changes with different n_clusters
-    for mod in ['AG', 'KM', 'GM']:
-        plot_sil_scores(X_users.todense(), model=mod)
-
-    # Silhouette plots for clustered data
-    # for i in range(3,9):
-    #     for mod in ['AG', 'KM', 'GM']:
-    #         cluster_and_plot(X.todense(), n_clusters=i, model=mod, title='full')
-
-    # See how silhouette score changes with different n_clusters
-    for mod in ['AG', 'KM', 'GM']:
-        plot_sil_scores(X.todense(), model=mod, title='full')
+    # df_users['GM_Cluster'] = gm_labels
+    # df_users['AG_Cluster'] = ag_labels
