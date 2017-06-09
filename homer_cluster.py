@@ -1,28 +1,26 @@
 import numpy as np
 import pandas as pd
 from kmodes import kmodes, kprototypes
-from sklearn.preprocessing import scale
+from sklearn.preprocessing import scale, LabelEncoder, OneHotEncoder
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import mca
 import pickle
 import pdb
-from homer_silhouette import cluster_and_plot
+from homer_silhouette import cluster_and_plot, plot_sil_scores
+from sklearn.cluster import KMeans, AgglomerativeClustering
+from sklearn.mixture import GaussianMixture
+from sklearn.manifold import TSNE
+from sklearn.neighbors import kneighbors_graph
 
 
-def prep_kproto(main_df):
-    df = main_df.copy()
+def one_hot(df_):
+    df = df_.copy()
 
-    cols_to_keep = ['NumSims',
-                    'StyleRealtime',
-                    'StyleSimple',
-                    'StyleScheduled',
-                    'MonthlyPurchaseCapacity',
-                    'UnreliableGrid',
+    cols_to_keep = ['UserRole',
+                    'OrganizationType',
                     'Sample',
-                    'Latitude',
-                    'Longitude',
                     'ImportedWind',
                     'ImportedSolar',
                     'GenCostMultiLines',
@@ -30,46 +28,86 @@ def prep_kproto(main_df):
                     'BatCostMultiLines',
                     'PvCostMultiLines',
                     'ConCostMultiLines',
-                    'IsProUser',
-                    'DaysSinceFirst',
-                    'AcademicOrIndividual'
+                    ]
+
+    df = df[cols_to_keep]
+
+    df['UserRole'] = df['UserRole'].astype(object)
+    df['OrganizationType'] = df['OrganizationType'].astype(object)
+
+    le = LabelEncoder()
+    enc_dct = dict()
+    cat_cols = []
+    for col in df.columns:
+        if df[col].dtype == object:
+            idx = df.columns.get_loc(col)
+            cat_cols.append(idx)
+
+            df[col] = le.fit_transform(df[col])
+            enc_dct[col] = le
+
+    X = df.values
+    enc = OneHotEncoder(categorical_features=cat_cols)
+    X = enc.fit_transform(X)
+
+    return X
+
+def run_mca(X):
+    mca_ben = mca.MCA(X)
+    return mca_ben
+
+def run_tsne(X):
+    model = TSNE(n_components=6, method='exact', random_state=0)
+    X = model.fit_transform(X)
+    return X
+
+def run_pca(X):
+    pca = PCA(n_components=8, random_state=42)
+    X_transformed = pca.fit_transform(X)
+    return pca, X_transformed
+
+def prep_kproto(df_):
+    df = df_.copy()
+
+    cols_to_keep = ['NumSims',
+                    'UserRole',
+                    'OrganizationType',
+                    'Sample',
+                    'ImportedWind',
+                    'ImportedSolar',
+                    'GenCostMultiLines',
+                    'WindCostMultiLines',
+                    'BatCostMultiLines',
+                    'PvCostMultiLines',
+                    'ConCostMultiLines',
                     ]
 
     df = df[cols_to_keep]
 
     # convert 1/0 int columns to boolen type
-    bool_cols = ['StyleRealtime', 'StyleSimple', 'StyleScheduled', 'MonthlyPurchaseCapacity', 'UnreliableGrid', 'Sample', 'Chp', 'GridConnected','ImportedWind', 'ImportedSolar', 'GenCostMultiLines', 'WindCostMultiLines', 'BatCostMultiLines', 'PvCostMultiLines', 'ConCostMultiLines', 'IsProUser', 'AcademicOrIndividual']
+    bool_cols = ['Sample', 'ImportedWind', 'ImportedSolar', 'GenCostMultiLines', 'WindCostMultiLines', 'BatCostMultiLines', 'PvCostMultiLines', 'ConCostMultiLines']
     for col in bool_cols:
         df[col] = df[col].astype(bool)
 
     # determine which columns are categorical
     cat_cols = []
-    for col in bool_cols:
-        idx = df.columns.get_loc(col)
-        cat_cols.append(idx)
+    for col in df.columns:
+        if df[col].dtype == object or df[col].dtype == bool:
+            idx = df.columns.get_loc(col)
+            cat_cols.append(idx)
 
     # scale continuous variables
-    for col in cols_to_keep:
-        if col not in bool_cols:
-            x_scaled = scale(df[col].values)
-            df[col] = x_scaled
+    x_scaled = scale(df['NumSims'].values)
+    df['NumSims'] = x_scaled
 
-    kproto_data = df.values
+    return cat_cols, df
 
-    return cat_cols, kproto_data
+def prep_kmodes(df_):
+    df = df_.copy()
 
-def prep_kmodes(main_df):
-    df = main_df.copy()
-
-    cols_to_keep =['StyleExtension',
-                    'StyleRealtime',
-                    'StyleSimple',
-                    'StyleScheduled',
-                    'MonthlyPurchaseCapacity',
-                    'UnreliableGrid',
+    cols_to_keep = ['UserRole',
+                    'OrganizationType',
                     'Sample',
-                    'Chp',
-                    'GridConnected',
                     'ImportedWind',
                     'ImportedSolar',
                     'GenCostMultiLines',
@@ -77,22 +115,25 @@ def prep_kmodes(main_df):
                     'BatCostMultiLines',
                     'PvCostMultiLines',
                     'ConCostMultiLines',
-                    'IsProUser',
-                    'AcademicOrIndividual'
                     ]
 
     df = df[cols_to_keep]
 
-    # binary data used for silhouette scoring
-    binary_data = df.values
+    df['UserRole'] = df['UserRole'].astype(object)
+    df['OrganizationType'] = df['OrganizationType'].astype(object)
 
-    for col in df.columns.tolist():
-        df[col] = df[col].astype(bool)
+    le = LabelEncoder()
+    enc_dct = dict()
+    cat_cols = []
+    for col in df.columns:
+        if df[col].dtype == object:
+            idx = df.columns.get_loc(col)
+            cat_cols.append(idx)
 
-    # data with categorical values for kmodes algorithm
-    kmodes_data = df.values
+            df[col] = le.fit_transform(df[col])
+            enc_dct[col] = le
 
-    return binary_data, kmodes_data
+    return df
 
 def kproto_cluster(X, cat_cols, init_method='Huang', n_clusters=4):
     kp = kprototypes.KPrototypes(n_clusters=n_clusters, init=init_method, n_init=5, max_iter=5, verbose=2)
@@ -104,99 +145,86 @@ def kmodes_cluster(X, init_method='Huang', n_clusters=4):
     labels = km.fit_predict(X)
     return labels
 
-# PCA really isn't viable with kmodes or kprototypes
-def set_pca(X):
-    pca = PCA(n_components=10, random_state=42)
-    X_transformed = pca.fit_transform(X)
-    return pca, X_transformed
-
-# PCA really isn't viable with kmodes or kprototypes
-def scree_plot(pca, title=None):
-    num_components = pca.n_components_
-    ind = np.arange(num_components)
-    vals = pca.explained_variance_ratio_
-    plt.figure(figsize=(8, 6))
-    ax = plt.subplot(111)
-    ax.bar(ind, vals, 0.35,
-        color=[(0.949, 0.718, 0.004),
-               (0.898, 0.49, 0.016),
-               (0.863, 0, 0.188),
-               (0.694, 0, 0.345),
-               (0.486, 0.216, 0.541),
-               (0.204, 0.396, 0.667),
-               (0.035, 0.635, 0.459),
-               (0.486, 0.722, 0.329),
-               ])
-
-    for i in range(num_components):
-        ax.annotate(r'%s%%' % ((str(vals[i]*100)[:4])), (ind[i]+0.2, vals[i]), va='bottom', ha='center', fontsize=12)
-
-    ax.set_xticklabels(ind, fontsize=12)
-
-    ax.set_ylim(0, max(vals)+0.05)
-    ax.set_xlim(0-0.45, 8+0.45)
-
-    ax.xaxis.set_tick_params(width=0)
-    ax.yaxis.set_tick_params(width=2, length=12)
-
-    ax.set_xlabel('Principal Component', fontsize=12)
-    ax.set_ylabel('Variance Explained (%)', fontsize=12)
-
-    if title is not None:
-        plt.title(title, fontsize=16)
-
-    plt.savefig('img/pca_scree.png', dpi=250)
-    plt.close()
-
-# PCA plots aren't adviseable with kprototypes
-def plot_kproto(X, labels, n_clusters=4, title=None):
-    plt.figure(figsize=(8, 6))
-    ax = plt.subplot(111)
+def plot_clusters(X, labels, n_clusters=4):
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111)
 
     colors = cm.spectral(labels.astype(float) / n_clusters)
     ax.scatter(X[:, 0], X[:, 1], marker='.', s=30, lw=0, alpha=0.7, c=colors)
 
-    if title is not None:
-        plt.title(title, fontsize=16)
-
-    plt.savefig('img/kproto_clusters_{}.png'.format(n_clusters), dpi=250)
+    plt.savefig('img/pca_clusters.png'.format(n_clusters), dpi=200)
     plt.close()
 
-# PCA plots aren't adviseable with kmodes...
-def plot_kmodes(X, labels, n_clusters=4, title=None):
-    plt.figure(figsize=(8, 6))
-    ax = plt.subplot(111)
-
-    colors = cm.spectral(labels.astype(float) / n_clusters)
-    ax.scatter(X[:, 0], X[:, 1], marker='.', s=30, lw=0, alpha=0.7, c=colors)
-
-    if title is not None:
-        plt.title(title, fontsize=16)
-
-    plt.savefig('img/kmodes_clusters_{}.png'.format(n_clusters), dpi=250)
-    plt.close()
 
 if __name__ == '__main__':
     plt.close('all')
     # ---Read in data---
-    df = pd.read_pickle('data/full_df.pkl')
-    df_users = pd.read_pickle('data/user_df.pkl')
-    # X_ohe = np.loadtxt('data/users_ohe.csv')
+    df = pd.read_pickle('data/df.pkl')
+    df_users = pd.read_pickle('data/df_users.pkl')
 
-    # ---Run kprototypes clustering---
-    # cat_cols, kproto_data = prep_kproto_pca(df_users)
-    # kp_labels = kproto_cluster(kproto_data, cat_cols)
-    # pca, X_transformed = set_pca(pca_data)
-    # plot_kproto(X_transformed, kp_labels)
-    # scree_plot(pca)
+    # CLUSTER AND APPEND LABELS TO USER DATASET
+    # ---One Hot Encode---
+    X_users = one_hot(df_users)
 
-    # ---Run kmodes clustering---
-    # binary_data, kmodes_data = prep_kmodes(df_users)
-    # km_labels = kmodes_cluster(kmodes_data, n_clusters=4)
-    # pca, X_transformed = set_pca(pca_data.todense())
-    # plot_kmodes(X_transformed, km_cluster_labels)
-    # scree_plot(pca)
+    # ---Gaussian Mixture---
+    # gm = GaussianMixture(n_components=4, covariance_type='tied', max_iter=20, n_init=50, random_state=42, verbose=1)
+    # gm.fit(X_users.todense())
+    # gm_labels_users = gm.predict(X_users.todense())
 
-    # ---Create silhoutte plots---
-    # for i in range(2,9):
-    #     cluster_and_plot(binary_data, n_clusters=i)
+    # ---KModes---
+    # df_users_km = prep_kmodes(df_users)
+    # km_labels_users = kmodes_cluster(df_users_km)
+
+    # ---Agglomerative Clustering---
+    # ag = AgglomerativeClustering(n_clusters=4, affinity='cosine', linkage='average')
+    # ag_labels_users = ag.fit_predict(X_users.todense())
+
+    # ---Append lables to dataframe and pickle---
+    # df_users['GM_Cluster'] = gm_labels_users
+    # df_users['KM_Cluster'] = km_labels_users
+    # df_users['AG_Cluster'] = ag_labels_users
+
+    # df_users.to_pickle('data/user_df_clustered.pkl')
+
+    # CLUSTER AND APPEND LABELS TO FULL DATASET
+    # ---One Hot Encode---
+    X = one_hot(df)
+
+    # ---Gaussian Mixture---
+    # gm = GaussianMixture(n_components=4, covariance_type='tied', max_iter=20, n_init=30, random_state=42, verbose=1)
+    # gm.fit(X.todense())
+    # gm_labels = gm.predict(X.todense())
+
+    # ---KModes---
+    # df_km = prep_kmodes(df)
+    # km_labels = kmodes_cluster(df_km)
+
+    # ---Agglomerative Clustering--- (Need to run this on AWS)
+    # ag = AgglomerativeClustering(n_clusters=4, affinity='cosine', linkage='average')
+    # ag_labels = ag.fit_predict(X.todense())
+
+    # ---Append lables to dataframe and pickle---
+    # df['GM_Cluster'] = gm_labels
+    # df['KM_Cluster'] = km_labels
+    # df['AG_Cluster'] = ag_labels # unable to do AG; not enough RAM
+
+    # df.to_pickle('data/df_clustered.pkl')
+
+    # CREATE SILHOUETTE PLOTS
+    # Silhouette plots for user clustered data
+    # for i in range(3,9):
+    #     for mod in ['AG', 'KM', 'GM']:
+    #         cluster_and_plot(X_users.todense(), n_clusters=i, model=mod)
+
+    # See how silhouette score changes with different n_clusters
+    for mod in ['AG', 'KM', 'GM']:
+        plot_sil_scores(X_users.todense(), model=mod)
+
+    # Silhouette plots for clustered data
+    # for i in range(3,9):
+    #     for mod in ['AG', 'KM', 'GM']:
+    #         cluster_and_plot(X.todense(), n_clusters=i, model=mod, title='full')
+
+    # See how silhouette score changes with different n_clusters
+    for mod in ['AG', 'KM', 'GM']:
+        plot_sil_scores(X.todense(), model=mod, title='full')

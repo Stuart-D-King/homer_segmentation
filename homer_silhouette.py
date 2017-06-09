@@ -7,8 +7,10 @@ import pandas as pd
 import numpy as np
 from kmodes import kmodes, kprototypes
 import pdb
+from sklearn.cluster import KMeans, AgglomerativeClustering
+from sklearn.mixture import GaussianMixture
 
-def cluster_and_plot(X, n_clusters):
+def cluster_and_plot(X, n_clusters, model='AG', title='users'):
     fig = plt.figure(figsize=(8,6))
     ax = fig.add_subplot(111)
 
@@ -16,24 +18,33 @@ def cluster_and_plot(X, n_clusters):
     # The (n_clusters+1)*10 is for inserting blank space between silhouette plots of individual clusters, to demarcate them clearly.
     ax.set_ylim([0, len(X) + (n_clusters + 1) * 10])
 
-    # Initialize the clusterer with n_clusters; can't set random seed with kmodes
-    km = kmodes.KModes(n_clusters=n_clusters, init='Huang', n_init=5, max_iter=5, verbose=2)
-    cluster_labels = km.fit_predict(X)
+    # Initialize clusterer and set random state, if possible
+    if model == 'AG':
+        clusterer = AgglomerativeClustering(n_clusters=n_clusters, affinity='cosine', linkage='average').fit(X)
+        labels = clusterer.labels_
+
+    elif model == 'KM':
+        clusterer = kmodes.KModes(n_clusters=n_clusters, n_init=5, init='Huang', verbose=1)
+        labels = clusterer.fit_predict(X)
+
+    elif model == 'GM':
+        clusterer = GaussianMixture(n_components=n_clusters, covariance_type='tied', max_iter=20, n_init=50, random_state=42, verbose=1).fit(X)
+        labels = clusterer.predict(X)
 
     # The silhouette_score gives the average value for all the samples.
     # This gives a perspective into the density and separation of the formed clusters
-    silhouette_avg = silhouette_score(X, cluster_labels, metric='hamming')
+    silhouette_avg = silhouette_score(X, labels, metric='hamming')
 
-    print('For n_clusters = {} the average silhouette_score is: {}.'format(n_clusters, silhouette_avg))
+    print('For n_clusters = {} the average silhouette_score is: {}'.format(n_clusters, silhouette_avg))
 
     # Compute the silhouette scores for each sample
-    sample_silhouette_values = silhouette_samples(X, cluster_labels, metric='hamming')
+    sample_silhouette_values = silhouette_samples(X, labels, metric='hamming')
 
     y_lower = 10
     for i in range(n_clusters):
         # Aggregate the silhouette scores for samples belonging to cluster i, and sort them
         ith_cluster_silhouette_values = \
-            sample_silhouette_values[cluster_labels == i]
+            sample_silhouette_values[labels == i]
 
         ith_cluster_silhouette_values.sort()
 
@@ -59,26 +70,37 @@ def cluster_and_plot(X, n_clusters):
     ax.set_yticks([])  # Clear the yaxis labels / ticks
     ax.set_xticks([-0.6, -0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8, 1])
 
-    plt.title('Silhouette analysis for KModes with {} clusters'.format(n_clusters))
+    plt.title('Silhouette analysis for {} with {} clusters'.format(clusterer.__class__.__name__, n_clusters))
 
-    plt.savefig('img/silhouette_{}n.png'.format(n_clusters), dpi=200)
+    plt.savefig('img/silhouette/sil_{}_{}_{}.png'.format(clusterer.__class__.__name__, n_clusters, title), dpi=200)
     plt.close()
 
-def get_silhouette_score(X, n_clusters):
-    km = kmodes.KModes(n_clusters=n_clusters, init='Huang', n_init=5, max_iter=5, verbose=2)
-    cluster_labels = km.fit_predict(X)
-    sil_avg = silhouette_score(X, cluster_labels, metric='hamming')
+def get_silhouette_score(X, n_clusters, model='AG'):
+    # Initialize clusterer and set random state, if possible
+    if model == 'AG':
+        clusterer = AgglomerativeClustering(n_clusters=n_clusters, affinity='cosine', linkage='average').fit(X)
+        labels = clusterer.labels_
+
+    elif model == 'KM':
+        clusterer = kmodes.KModes(n_clusters=n_clusters, n_init=5, init='Huang', verbose=1)
+        labels = clusterer.fit_predict(X)
+
+    elif model == 'GM':
+        clusterer = GaussianMixture(n_components=n_clusters, covariance_type='tied', max_iter=20, n_init=50, random_state=42, verbose=1).fit(X)
+        labels = clusterer.predict(X)
+
+    sil_avg = silhouette_score(X, labels, metric='hamming')
     return sil_avg
 
-def plot_sil_scores(X):
+def plot_sil_scores(X, model, title='users'):
     fig = plt.figure(figsize=(8,6))
     ax = fig.add_subplot(111)
 
-    sil_scores = [get_silhouette_score(X, i) for i in range(2,9)]
-    ax.plot(range(2,9), sil_scores)
+    sil_scores = [get_silhouette_score(X, i, model) for i in range(3,9)]
+    ax.plot(range(3,9), sil_scores)
     ax.set_xlabel('Number of Clusters')
     ax.set_ylabel('Silhouette Score')
     plt.title('Silhouette Score vs. Number of Clusters')
 
-    plt.savefig('img/silhouette_v_clusters.png', dpi=200)
+    plt.savefig('img/silhouette/sil_v_clust_{}_{}.png'.format(model, title), dpi=200)
     plt.close()

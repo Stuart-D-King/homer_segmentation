@@ -1,28 +1,22 @@
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder
-from geopy.geocoders import Nominatim, GoogleV3, NaviData
 import pdb
 import itertools
+import requests
+import reverse_geocoder as rg
+import xml.etree.ElementTree as ET
 
 def read_data():
     df = pd.read_csv('data/combined_grid_and_run_data.csv', encoding='iso-8859-1')
 
-    cols = ['Style',
-            'MonthlyPurchaseCapacity',
-            'UnreliableGrid',
-            'UserRole',
+    cols = ['UserRole',
             'OrganizationType',
-            'Sector',
             'Sample',
-            'ProjectCategory',
-            #'ProjectCountry',
-            'Chp',
             'Latitude',
             'Longitude',
-            'Created',
             'User',
-            'GridConnected',
+            'Created',
             'Generator0CostTable',
             'WindTurbine0CostTable',
             'Battery0CostTable',
@@ -34,34 +28,29 @@ def read_data():
     df = df[cols]
 
     print('Cleaning columns...')
-    # clean 'Style'
-    df['Style'] = df['Style'].replace(['0', np.nan], 'NA')
+    # change type of 'Created' to datetime
+    df['Created'] = pd.to_datetime(df['Created'])
 
     # clean 'UserRole'
-    df['UserRole'] = df['UserRole'].replace(['Undergraduate Student', 'Post-graduate Student'], 'Student')
-    df['UserRole'] = df['UserRole'].replace(['IT Professional'], 'IT Staff')
-    df['UserRole'] = df['UserRole'].replace(['Tenured or Tenure-track Faculty'], 'Faculty')
-    df['UserRole'] = df['UserRole'].replace([np.nan, 'Other'], 'NA')
+    df['UserRole'] = df['UserRole'].replace(['Student', 'Undergraduate Student', 'Post-graduate Student', 'Tenured or Tenure-track Faculty', 'Faculty', 'Research Staff'], 'Academic')
+    df['UserRole'] = df['UserRole'].replace(['Engineer', 'Mechanic/Technician/Facility Manager'], 'Technical')
+    df['UserRole'] = df['UserRole'].replace(['IT Professional', 'IT Staff', 'Sales/Marketing', 'Purchasing Agent', 'Executive', 'Planner/Regulator/Policy Maker'], 'Business')
+    df['UserRole'] = df['UserRole'].replace([np.nan, 'Personal Interest', 'Staff', 'Other'], 'NA')
+
+    df['UserRole'] = df['UserRole'].astype('category')
 
     # clean 'OrganizaitonType'
-    df['OrganizationType'] = df['OrganizationType'].replace([np.nan, 'Other'], 'NA')
+    df['OrganizationType'] = df['OrganizationType'].replace([np.nan, 'Other', 'Interested Individual', 'Microgrid End User (all types)'], 'NA')
+    df['OrganizationType'] = df['OrganizationType'].replace(['Engineering Services Company', 'Electric Distribution Utility', 'Independent Power Producer', 'Project Developer'], 'Engineering')
+    df['OrganizationType'] = df['OrganizationType'].replace(['EPC/Construction Company', 'Solar Installation Company', 'Equipment Vendor'], 'Vendor')
+    df['OrganizationType'] = df['OrganizationType'].replace(['Government', 'Non-Governmental Organization (NGO)'], 'Public')
+    df['OrganizationType'] = df['OrganizationType'].replace(['Academic Institution or Research Center'], 'Academic')
+    df['OrganizationType'] = df['OrganizationType'].replace(['Other Professional Services Company', 'Finance Organization'], 'Service')
+
+    df['OrganizationType'] = df['OrganizationType'].astype('category')
 
     # clean 'Sample'; if a sample is used = True, else = False
     df['Sample'] = np.where(df['Sample'].notnull(), True, False)
-
-    # clean 'ProjectCategory'
-    df['ProjectCategory'] = df['ProjectCategory'].replace(['0', np.nan], 'NA')
-
-    # clean 'ProjectCountry''
-    # df['ProjectCountry'] = df['ProjectCountry'].astype(str)
-    # df['ProjectCountry'] = df['ProjectCountry'].apply(lambda x: x.encode('ascii', 'ignore'))
-    # df['ProjectCountry'] = df['ProjectCountry'].apply(lambda x: x.decode('utf-8'))
-    #
-    # df['ProjectCountry'] = df['ProjectCountry'].apply(lambda x: 'saudi arabia' if 'saudi' in x else x)
-    # df['ProjectCountry'] = df['ProjectCountry'].apply(lambda x: 'uae' if 'united arab' in x else x)
-    # df['ProjectCountry'] = df['ProjectCountry'].apply(lambda x: 'usa' if 'united states' in x else x)
-    # df['ProjectCountry'] = df['ProjectCountry'].apply(lambda x: np.nan if '?' in x else x.lower())
-    # df['ProjectCountry'] = df['ProjectCountry'].replace(['nan'], 'NA')
 
     # clean latitude and longitude columns
     # will look into 'geopy' to see if I can impute coordinates for simulaitons without latitude and longitude
@@ -69,9 +58,6 @@ def read_data():
     for col in lat_lon_cols:
         df[col] = df[col].replace(['0'], np.nan)
         df[col] = df[col].astype(float)
-
-    # change type of 'Created' to datetime
-    df['Created'] = pd.to_datetime(df['Created'])
 
     # clean 'User'; drop users with len() != 6
     df['User'] = df['User'].apply(pd.to_numeric, errors='coerce')
@@ -94,47 +80,72 @@ def read_data():
     for table in cost_tables:
         df.drop(table, axis=1, inplace=True)
 
-    # create 'IsProUser'; True if an Engineer, Regulator, Technician, or Executive, False if none of those
-    df['IsProUser'] = np.where(df['UserRole'].str.contains('Engineer|Regulator|Technician|Executive'), True, False)
-
-    # create 'AcademicOrIndividual'; True if from an academic institution or an interested individual
-    df['AcademicOrIndividual'] = np.where(df['OrganizationType'].str.contains('Academic|Individual|NA'), True, False)
-
-    # dummize 'ProjectCategory' and 'Style' columns
-    df_dummies = pd.get_dummies(df, prefix=['Project', 'Style'], prefix_sep='', columns=['ProjectCategory', 'Style'])
-    df = pd.concat([df[['Style', 'ProjectCategory']], df_dummies], axis=1)
-
-    # print('Cleaning country column...')
-    # latitude = df.Latitude.values
-    # longitude = df.Longitude.values
-    #
-    # countries = []
-    # geolocator = Nominatim()
-    # geolocator = GoogleV3()
-    # for lat, lng in zip(latitude, longitude):
-    #     coord = '{}, {}'.format(str(lat).strip(), str(lng).strip())
-    #     location = geolocator.reverse(coord)
-    #     country = location.raw['address']['country']
-    #     countries.append(country)
-
-    # df['Country'] = countries
-
-    df.dropna(axis=0, how='any', inplace=True)
-
     print('Converting booleans to integers...')
     # convert boolean columns to int type
-    bool_cols = ['MonthlyPurchaseCapacity', 'UnreliableGrid', 'Sample', 'Chp', 'GridConnected', 'ImportedWind', 'ImportedSolar', 'GenCostMultiLines', 'WindCostMultiLines', 'BatCostMultiLines', 'PvCostMultiLines', 'ConCostMultiLines', 'IsProUser', 'AcademicOrIndividual']
+    bool_cols = ['Sample', 'ImportedWind', 'ImportedSolar', 'GenCostMultiLines', 'WindCostMultiLines', 'BatCostMultiLines', 'PvCostMultiLines', 'ConCostMultiLines']
 
     for col in bool_cols:
         if df[col].dtype != bool:
             df[col] = df[col].astype(bool)
         df[col] = df[col].astype(int)
 
+    df.dropna(axis=0, how='any', inplace=True)
     # reset dataframe index
     df.reset_index(drop=True, inplace=True)
 
     print('All done!')
     return df
+
+def score_rows(df):
+    # best possible score = 11
+    # worst possible score = -3
+    all_scores = []
+    for idx, row in df.iterrows():
+        score = 0
+        if row['UserRole'] == 'Technical':
+            score += 2
+        elif row['UserRole'] == 'Business':
+            score += 1
+        elif row['UserRole'] == 'Academic':
+            score -= 1
+
+        if row['OrganizationType'] == 'Engineering':
+            score += 2
+        elif row['OrganizationType'] == 'Public' or row['OrganizationType'] == 'Vendor':
+            score += 1
+        elif row['OrganizationType'] == 'Academic':
+            score -= 1
+
+        if row['Sample'] == 1:
+            score += 1
+
+        if row['ImportedWind'] == 1:
+            score += 1
+
+        if row['ImportedSolar'] == 1:
+            score += 1
+
+        if row['GenCostMultiLines'] == 1:
+            score += 1
+
+        if row['WindCostMultiLines'] == 1:
+            score += 1
+
+        if row['BatCostMultiLines'] == 1:
+            score += 1
+
+        if row['PvCostMultiLines'] == 1:
+            score += 1
+
+        if row['ConCostMultiLines'] == 1:
+            score += 1
+
+        if row['Latitude'] == np.nan or row['Longitude'] == np.nan:
+            score -= 1
+
+        all_scores.append(score)
+
+    return all_scores
 
 def create_user_df(df):
     '''
@@ -143,38 +154,25 @@ def create_user_df(df):
     :param df: dataframe to build new dataframe
     :returns: created user dataframe
     '''
+    df.dropna(axis=0, how='any', inplace=True)
+
     # group by user
     users = df.groupby('User')
-    # get the total simulations for each user
-    counts = users.size()
-    user_id = counts.index.values
-    num_sims = counts.values
+    # get number of simulations by user
+    sims = users['UserRole'].count()
+    user_id = users.grouper.result_index.values
+    num_sims = sims.values
 
     # create dataframe of user ids and add number of simulations column
     df_users = pd.DataFrame(data=user_id, columns=['UserId'])
     df_users['NumSims'] = num_sims
 
     # using the mode for each column from the full data frame, add column values to each new column created in user dataframe
-    cols = ['Style',
-            'StyleExtension',
-            'StyleRealtime',
-            'StyleSimple',
-            'StyleScheduled',
-            'MonthlyPurchaseCapacity',
-            'UnreliableGrid',
-            'UserRole',
+    cols = ['UserRole',
             'OrganizationType',
-            'Sector',
             'Sample',
-            'ProjectCategory',
-            'ProjectGrid',
-            'ProjectIsland',
-            'ProjectVillage',
-            # 'ProjectCountry',
-            'Chp',
             'Latitude',
             'Longitude',
-            'GridConnected',
             'ImportedWind',
             'ImportedSolar',
             'GenCostMultiLines',
@@ -182,23 +180,40 @@ def create_user_df(df):
             'BatCostMultiLines',
             'PvCostMultiLines',
             'ConCostMultiLines',
-            'IsProUser',
-            'AcademicOrIndividual']
+            ]
 
     for col in cols:
         df_users[col] = users[col].agg(lambda x: x.value_counts().index[0]).values
 
-    # create column of the time (in days) between first and last simulation for each user
-    diff_first_last = df.groupby('User')['Created'].apply(lambda x: x.max() - x.min()).values
-    df_users['DaysSinceFirst'] = diff_first_last.astype('timedelta64[D]').astype(int)
+    df['UserRole'] = df['UserRole'].astype('category')
+    df['OrganizationType'] = df['OrganizationType'].astype('category')
 
-    df_users = remove_outliers(df_users)
+    # df_users['Score'] = users['Score'].mean().values
+
+    # df_users = remove_outliers(df_users)
 
     return df_users
 
+def add_cc(df):
+    latitude = df.Latitude.values
+    longitude = df.Longitude.values
+
+    coordinates = []
+    for lat, lng in zip(latitude, longitude):
+        coordinates.append((lat, lng))
+
+    countries = []
+    results = rg.search(coordinates)
+    for r in results:
+        countries.append(r['cc'])
+
+    df['Country'] = countries
+
+    return df
+
 def remove_outliers(df):
     outliers_lst  = []
-    contin_cols = ['NumSims', 'DaysSinceFirst']
+    contin_cols = ['NumSims']
     for feature in contin_cols:
         Q1 = np.percentile(df.loc[:, feature], 25)
         Q3 = np.percentile(df.loc[:, feature], 75)
@@ -219,54 +234,14 @@ def remove_outliers(df):
 
     return good_df
 
-def one_hot(main_df):
-    df = main_df.copy()
-
-    # encode string categorical data
-    enc_dct = dict()
-    encode_cols = ['Style', 'ProjectCategory', 'UserRole', 'OrganizationType']
-    for col in encode_cols:
-        le = LabelEncoder()
-        le.fit(df[col])
-        df[col] = le.transform(df[col])
-        enc_dct[col] = le
-
-    cols = [
-            # 'Style',
-            'ProjectCategory',
-            'UserRole',
-            'OrganizationType',
-            'Sector',
-            # 'MonthlyPurchaseCapacity',
-            # 'UnreliableGrid',
-            'Sample',
-            # 'Chp',
-            # 'GridConnected',
-            'ImportedWind',
-            'ImportedSolar',
-            'GenCostMultiLines',
-            'WindCostMultiLines',
-            'BatCostMultiLines',
-            'PvCostMultiLines',
-            'ConCostMultiLines',
-            # 'IsProUser',
-            # 'AcademicOrIndividual'
-            ]
-
-    df = df[cols]
-    X = df.values
-    ohe = OneHotEncoder()
-    X = ohe.fit_transform(X)
-    return X
-
 def get_fips_codes(df):
-    df = df[df['Country'] == 'United States of America']
+    df = df[df['Country'] == 'US']
     latitude = df.Latitude.values
     longitude = df.Longitude.values
 
     fips_codes = []
     for lat, lng in zip(latitude, longitude):
-        url = 'http://data.fcc.gov/api/block/find?latitude={}&longitude={}&showall=true'.format(lat), lng)
+        url = 'http://data.fcc.gov/api/block/find?latitude={}&longitude={}&showall=true'.format(lat, lng)
         content = requests.get(url).content
         root = ET.fromstring(content)
         try:
@@ -276,18 +251,26 @@ def get_fips_codes(df):
 
     df['FIPS'] = fips_codes
 
+    return df
+
 if __name__ == '__main__':
     # ---Create dataframes---
-    # df = read_data()
-    # df_users = create_user_df(df)
-    # users_ohe = one_hot(df_users)
+    df = read_data()
+    df = add_cc(df)
+    # scores = score_rows(df)
+    # df['Score'] = scores
+    df_users = create_user_df(df)
+    df_users = add_cc(df_users)
 
     # ---Pickle dataframes---
-    # df.to_pickle('data/full_df.pkl')
-    # df_users.to_pickle('data/user_df.pkl')
-    # np.savetxt('data/users_ohe.csv', users_ohe.todense())
+    df.to_pickle('data/df.pkl')
+    df_users.to_pickle('data/df_users.pkl')
 
     # ---Read back in pickled dataframes---
-    # df = pd.read_pickle('data/full_df.pkl')
-    # df_users=pd.read_pickle('data/user_df.pkl')
-    # users_ohe = np.loadtxt('data/users_ohe.csv')
+    # df = pd.read_pickle('data/new_full_df.pkl')
+    # df_users = pd.read_pickle('data/new_user_df.pkl')
+
+    # --Create USA dataframe with FIPS codes---
+    # df_usa = get_fips_codes(df_users)
+    # df_usa.to_pickle('data/usa_df.pkl')
+    # df_usa = pd.read_pickle('data/usa_df.pkl')
