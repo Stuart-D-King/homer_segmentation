@@ -237,7 +237,7 @@ def create_user_df(df):
 
     return df_users
 
-def add_cc(df):
+def add_country_code(df):
     latitude = df.Latitude.values
     longitude = df.Longitude.values
 
@@ -294,10 +294,10 @@ def get_fips_codes(df):
 if __name__ == '__main__':
     # ---Create dataframes---
     # df = read_data()
-    # df = add_cc(df)
+    # df = add_country_code(df)
     # df['Score'] = score_rows(df)
     # df_users = create_user_df(df)
-    # df_users = add_cc(df_users)
+    # df_users = add_country_code(df_users)
 
     # ---Pickle dataframes---
     # df.to_pickle('data/df.pkl')
