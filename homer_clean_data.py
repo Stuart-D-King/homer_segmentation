@@ -17,19 +17,18 @@ def read_data():
             'Longitude',
             'User',
             'Created',
-            'Generator0CostTable',
-            'WindTurbine0CostTable',
-            'Battery0CostTable',
-            'Pv0CostTable',
-            'ConverterCostTable',
+            'Generator0',
+            'Generator0SearchSpace',
+            'WindTurbine0',
+            'WindTurbine0SearchSpace',
+            'Battery0',
+            'Battery0SearchSpace',
+            'Pv0',
+            'Pv0SearchSpace',
+            'Converter',
+            'ConverterSearchSpace',
             'ImportedWind',
-            'ImportedSolar',
-            'Electric1Peak',
-            'Generator0Capital',
-            'Battery0Capital',
-            'WindTurbine0Capital',
-            'Pv0Capital',
-            'Generator0'
+            'ImportedSolar'
             ]
 
     df = df[cols]
@@ -44,7 +43,7 @@ def read_data():
     df['UserRole'] = df['UserRole'].replace(['IT Professional', 'IT Staff', 'Sales/Marketing', 'Purchasing Agent', 'Executive', 'Planner/Regulator/Policy Maker'], 'Business')
     df['UserRole'] = df['UserRole'].replace([np.nan, 'Personal Interest', 'Staff', 'Other'], 'NA')
 
-    df['UserRole'] = df['UserRole'].astype('category')
+    # df['UserRole'] = df['UserRole'].astype('category')
 
     # clean 'OrganizaitonType'
     df['OrganizationType'] = df['OrganizationType'].replace([np.nan, 'Other', 'Interested Individual', 'Microgrid End User (all types)'], 'NA')
@@ -55,27 +54,38 @@ def read_data():
     df['OrganizationType'] = df['OrganizationType'].replace(['Other Professional Services Company', 'Finance Organization'], 'Service')
 
     # set 'OrganizationType' as category type
-    df['OrganizationType'] = df['OrganizationType'].astype('category')
+    # df['OrganizationType'] = df['OrganizationType'].astype('category')
 
     print('Creating new columns...')
-    # create new 'ElectDefault' column
-    df['ElectricNotDefault'] = df['Electric1Peak'].apply(lambda x: isinstance(x, float) and x != 0 and x < 1000000)
+
+    def f(x):
+        if x == 'NA':
+            val = -1
+        elif x == 'False':
+            val = 0
+        else:
+            val = 1
+        return val
+
+    df['MultiGenSearch'] = np.where(df['Generator0'].notnull(), df['Generator0SearchSpace'].astype(str).apply(lambda x: x.split('|')).apply(lambda x: len(x) > 2), 'NA')
+
+    df['MultiWindSearch'] = np.where(df['WindTurbine0'].notnull(), df['WindTurbine0SearchSpace'].astype(str).apply(lambda x: x.split('|')).apply(lambda x: len(x) > 2), 'NA')
+
+    df['MultiBatSearch'] = np.where(df['Battery0'].notnull(), df['Battery0SearchSpace'].astype(str).apply(lambda x: x.split('|')).apply(lambda x: len(x) > 2), 'NA')
+
+    df['MultiPvSearch'] = np.where(df['Pv0'].notnull(), df['Pv0SearchSpace'].astype(str).apply(lambda x: x.split('|')).apply(lambda x: len(x) > 2), 'NA')
+
+    df['MultiConSearch'] = np.where(df['Converter'].notnull(), df['ConverterSearchSpace'].astype(str).apply(lambda x: x.split('|')).apply(lambda x: len(x) > 2), 'NA')
 
     # create new 'GeneratorDefault' column
-    df['GeneratorNotDefault'] = np.where(df['Generator0'] == 'Autosize Genset', False, True)
-
-    # create new capital cost columns to see if a user input a value or not
-    df['GenCapCost'] = np.where(df['Generator0Capital'] != 0, True, False)
-    df['BatCapCost'] = np.where(df['Battery0Capital'] != 0, True, False)
-    df['WindCapCost'] = np.where(df['WindTurbine0Capital'] != 0, True, False)
-    df['PvCapCost'] = np.where(df['Pv0Capital'] != 0, True, False)
+    df['DefaultGenerator'] = np.where(df['Generator0'] == 'Autosize Genset', True, False)
+    df['DefaultGenerator'] = np.where(df['Generator0'].notnull(), np.where(df['Generator0'] == 'Autosize Genset', True, False), 'NA')
 
     # drop columns no longer needed
-    for table in ['Electric1Peak', 'Generator0', 'Generator0Capital', 'Battery0Capital', 'WindTurbine0Capital', 'Pv0Capital']:
-        df.drop(table, axis=1, inplace=True)
+    for col in ['Generator0', 'Generator0SearchSpace', 'WindTurbine0', 'WindTurbine0SearchSpace', 'Battery0', 'Battery0SearchSpace', 'Pv0', 'Pv0SearchSpace', 'Converter', 'ConverterSearchSpace']:
+        df.drop(col, axis=1, inplace=True)
 
     # clean latitude and longitude columns
-    # will look into 'geopy' to see if I can impute coordinates for simulaitons without latitude and longitude
     lat_lon_cols = ['Latitude', 'Longitude']
     for col in lat_lon_cols:
         df[col] = df[col].replace(['0'], np.nan)
@@ -91,19 +101,10 @@ def read_data():
     # drop any Users with IDs whose length is not 6
     df = df[df['User'].map(len) == 6]
 
-    # create boolean columns of if a cost table has multiple lines
-    cost_tables = ['Generator0CostTable', 'WindTurbine0CostTable', 'Battery0CostTable', 'Pv0CostTable', 'ConverterCostTable']
-    costs = ['Gen', 'Wind', 'Bat', 'Pv', 'Con']
-    for name, table in zip(costs, cost_tables):
-        df[name+'CostMultiLines'] = df[table].astype(str).apply(lambda x: x.split('|')).apply(lambda x: len(x) > 1)
-
-    # drop cost table columns no longer needed
-    for table in cost_tables:
-        df.drop(table, axis=1, inplace=True)
 
     print('Converting booleans to integers...')
     # convert boolean columns to int type
-    bool_cols = ['ImportedWind', 'ImportedSolar', 'GenCostMultiLines', 'WindCostMultiLines', 'BatCostMultiLines', 'PvCostMultiLines', 'ConCostMultiLines', 'ElectricNotDefault', 'GeneratorNotDefault', 'GenCapCost', 'BatCapCost', 'WindCapCost', 'PvCapCost']
+    bool_cols = ['ImportedWind', 'ImportedSolar', 'DefaultGenerator']
 
     for col in bool_cols:
         if df[col].dtype != bool:
@@ -116,54 +117,6 @@ def read_data():
 
     print('All done!')
     return df
-
-def score_rows(df):
-    # best possible score = 11
-    # worst possible score = -3
-    all_scores = []
-    for idx, row in df.iterrows():
-        score = 0
-        if row['UserRole'] == 'Technical':
-            score += 2
-        elif row['UserRole'] == 'Business':
-            score += 1
-        elif row['UserRole'] == 'Academic':
-            score -= 1
-
-        if row['OrganizationType'] == 'Engineering':
-            score += 2
-        elif row['OrganizationType'] == 'Public' or row['OrganizationType'] == 'Vendor':
-            score += 1
-        elif row['OrganizationType'] == 'Academic':
-            score -= 1
-
-        if row['ImportedWind'] == 1:
-            score += 1
-
-        if row['ImportedSolar'] == 1:
-            score += 1
-
-        if row['GenCostMultiLines'] == 1:
-            score += 1
-
-        if row['WindCostMultiLines'] == 1:
-            score += 1
-
-        if row['BatCostMultiLines'] == 1:
-            score += 1
-
-        if row['PvCostMultiLines'] == 1:
-            score += 1
-
-        if row['ConCostMultiLines'] == 1:
-            score += 1
-
-        if row['Latitude'] == np.nan or row['Longitude'] == np.nan:
-            score -= 1
-
-        all_scores.append(score)
-
-    return all_scores
 
 def create_user_df(df):
     '''
@@ -190,47 +143,30 @@ def create_user_df(df):
             'OrganizationType',
             'Latitude',
             'Longitude',
+            'MultiGenSearch',
+            'MultiWindSearch',
+            'MultiBatSearch',
+            'MultiPvSearch',
+            'MultiConSearch',
+            'DefaultGenerator',
             'ImportedWind',
-            'ImportedSolar',
-            'ElectricNotDefault',
-            'GeneratorNotDefault',
-            'GenCapCost',
-            'BatCapCost',
-            'WindCapCost',
-            'PvCapCost',
-            'GenCostMultiLines',
-            'WindCostMultiLines',
-            'BatCostMultiLines',
-            'PvCostMultiLines',
-            'ConCostMultiLines'
+            'ImportedSolar'
             ]
 
     for col in cols:
         df_users[col] = users[col].agg(lambda x: x.value_counts().index[0]).values
 
     # change dtype of 'UserRole' and 'OrganizationType' to category
-    df_users['UserRole'] = df_users['UserRole'].astype('category')
-    df_users['OrganizationType'] = df_users['OrganizationType'].astype('category')
-
-    # to cacluate the number of changed inputs
-    input_cols = ['ImportedWind',
-                'ImportedSolar',
-                'ElectricNotDefault',
-                'GeneratorNotDefault',
-                'GenCapCost',
-                'BatCapCost',
-                'WindCapCost',
-                'PvCapCost',
-                'GenCostMultiLines',
-                'WindCostMultiLines',
-                'BatCostMultiLines',
-                'PvCostMultiLines',
-                'ConCostMultiLines'
-                ]
-
-    # create 'NumChangedInputs' column = sums all true values in boolean columns
-    df_users['NumChangedInputs'] = df_users[input_cols].sum(axis=1)
-    # df_users['Score'] = users['Score'].mean().values
+    # df_users['UserRole'] = df_users['UserRole'].astype('category')
+    # df_users['OrganizationType'] = df_users['OrganizationType'].astype('category')
+    # df_users['MultiGenSearch'] = df_users['MultiGenSearch'].astype('category')
+    # df_users['MultiWindSearch'] = df_users['MultiWindSearch'].astype('category')
+    # df_users['MultiBatSearch'] = df_users['MultiBatSearch'].astype('category')
+    # df_users['MultiPvSearch'] = df_users['MultiPvSearch'].astype('category')
+    # df_users['MultiConSearch'] = df_users['MultiConSearch'].astype('category')
+    # df_users['DefaultGenerator'] = df_users['DefaultGenerator'].astype(bool)
+    # df_users['ImportedWind'] = df_users['ImportedWind'].astype(bool)
+    # df_users['ImportedSolar'] = df_users['ImportedSolar'].astype(bool)
 
     # remove outliers and reset index in 'NumSims' column
     # df_users = remove_outliers(df_users)
@@ -293,32 +229,31 @@ def get_fips_codes(df):
 
 if __name__ == '__main__':
     # ---Create dataframes---
-    # df = read_data()
-    # df = add_country_code(df)
-    # df['Score'] = score_rows(df)
-    # df_users = create_user_df(df)
-    # df_users = add_country_code(df_users)
+    df = read_data()
+    df = add_country_code(df)
+    df_users = create_user_df(df)
+    df_users = add_country_code(df_users)
 
     # ---Pickle dataframes---
-    # df.to_pickle('data/df.pkl')
-    # df_users.to_pickle('data/df_users.pkl')
+    df.to_pickle('data/df.pkl')
+    df_users.to_pickle('data/df_users.pkl')
 
     # ---Read back in pickled dataframes---
-    # df = pd.read_pickle('data/df.pkl')
-    # df_users = pd.read_pickle('data/df_users.pkl')
+    df = pd.read_pickle('data/df.pkl')
+    df_users = pd.read_pickle('data/df_users.pkl')
 
     # AFTER CLUSTERING
     # ---Read in clustered dataframes---
-    df_clustered = pd.read_pickle('data/df_clustered.pkl')
-    df_users_clustered = pd.read_pickle('data/df_users_clustered.pkl')
+    # df_clustered = pd.read_pickle('data/df_clustered.pkl')
+    # df_users_clustered = pd.read_pickle('data/df_users_clustered.pkl')
 
     # ---Create USA dataframe with FIPS codes---
-    df_usa = get_fips_codes(df_clustered)
-    df_users_usa = get_fips_codes(df_users_clustered)
+    # df_usa = get_fips_codes(df_clustered)
+    # df_users_usa = get_fips_codes(df_users_clustered)
 
     # ---Pickle USA dataframes---
-    df_usa.to_pickle('data/df_usa.pkl')
-    df_users_usa.to_pickle('data/df_users_usa')
+    # df_usa.to_pickle('data/df_usa.pkl')
+    # df_users_usa.to_pickle('data/df_users_usa.pkl')
 
     # ---Read back in pickled USA dataframes---
     # df_usa = pd.read_pickle('data/df_usa.pkl')

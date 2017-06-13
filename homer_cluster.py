@@ -119,34 +119,25 @@ def prep_kmodes(df_):
 
     cols_to_keep = ['UserRole',
                     'OrganizationType',
+                    'MultiGenSearch',
+                    'MultiWindSearch',
+                    'MultiBatSearch',
+                    'MultiPvSearch',
+                    'MultiConSearch',
+                    'DefaultGenerator',
                     'ImportedWind',
-                    'ImportedSolar',
-                    'GenCostMultiLines',
-                    'WindCostMultiLines',
-                    'BatCostMultiLines',
-                    'PvCostMultiLines',
-                    'ConCostMultiLines',
-                    'ElectricNotDefault',
-                    'GeneratorNotDefault',
-                    'GenCapCost',
-                    'BatCapCost',
-                    'WindCapCost',
-                    'PvCapCost'
+                    'ImportedSolar'
                     ]
 
     df = df[cols_to_keep]
 
-    df['UserRole'] = df['UserRole'].astype(object)
-    df['OrganizationType'] = df['OrganizationType'].astype(object)
+    # df['UserRole'] = df['UserRole'].astype(object)
+    # df['OrganizationType'] = df['OrganizationType'].astype(object)
 
     le = LabelEncoder()
     enc_dct = dict()
-    cat_cols = []
     for col in df.columns:
         if df[col].dtype == object:
-            idx = df.columns.get_loc(col)
-            cat_cols.append(idx)
-
             df[col] = le.fit_transform(df[col])
             enc_dct[col] = le
 
@@ -184,13 +175,14 @@ if __name__ == '__main__':
     km_model, km_labels = run_kmodes(df_users_km)
 
     # ---Append lables to dataframe and pickle---
-    df_users['KM_Cluster'] = km_labels
+    df_users['Cluster'] = km_labels
+    df_users['Cluster'] = df_users['Cluster'].apply(lambda x: x+1)
 
     # ---Map cluster labels to full dataframe---
     keys = df_users['UserId'].tolist()
-    values = df_users['KM_Cluster'].tolist()
+    values = df_users['Cluster'].tolist()
     user_cluster_dct = dict(zip(keys, values))
-    df['KM_Cluster'] = df['User'].map(user_cluster_dct)
+    df['Cluster'] = df['User'].map(user_cluster_dct)
 
     # ---Pickle clustered dataframes and KModes model---
     df_users.to_pickle('data/df_users_clustered.pkl')

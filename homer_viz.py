@@ -9,6 +9,7 @@ import folium
 import pdb
 import seaborn as sns
 import scipy.stats as scs
+from homer_clean_data import remove_outliers
 
 def bar_charts(df):
     cols = ['ImportedWind', 'ImportedSolar', 'ElectricNotDefault', 'GeneratorNotDefault', 'GenCapCost', 'BatCapCost', 'WindCapCost', 'PvCapCost']
@@ -33,7 +34,9 @@ def heat_map_users(df):
     ax = sns.heatmap(agg.unstack(level='UserRole'), annot=True)
     ax.set_title('Average Number of Simulations by Cluster and User Role', fontsize=14)
 
-    plt.show()
+    plt.tight_layout()
+    plt.savefig('img/user_heatmap.png', dpi=200)
+    # plt.show()
 
 def heat_map_sims(df):
     fig = plt.figure(figsize=(8,4))
@@ -48,8 +51,11 @@ def count_sims_cluster(df):
     fig = plt.figure(figsize=(8,4))
     ax = fig.add_subplot(111)
     sns.countplot(y='KM_Cluster', data=df, ax=ax, color="c")
-    plt.title('Number of Simulations per Cluster')
-    plt.show()
+    plt.title('Number of Simulations per Cluster', fontsize=14)
+
+    plt.tight_layout()
+    plt.savefig('img/cluster_counts.png', dpi=200)
+    # plt.show()
 
 def count_user_cluster(df):
     fig = plt.figure(figsize=(8,6))
@@ -140,6 +146,20 @@ def weekday_weekend(df):
     plt.legend()
     plt.show()
 
+def cluster_bars(df):
+    # categorical vs categorical vs numeric
+    agg = df.groupby(['KM_Cluster', 'UserRole'])['UserRole'].count()
+    # print(agg)
+    agg = agg.unstack(level='UserRole')
+    # print(agg)
+    fig, ax = plt.subplots(1, 1, figsize=(10, 4))
+    agg.plot(kind='bar', ax=ax).set_ylabel('Simulations')
+
+    plt.title('Number of Simulations by Cluster and User Role', fontsize=14)
+
+    plt.savefig('img/sims_by_cluser_user.png', dpi=200)
+    plt.close()
+
 def marker_map(df, title=None):
     df = df[df['KM_Cluster'] == 2]
 
@@ -192,7 +212,7 @@ def choropleth_map(df, title=None):
     m.save('img/maps/choro_map.html')
 
 def marker_cluster_map(df):
-    df = df[df['KM_Cluster'] == 2]
+    # df = df[df['Cluster'] == 2]
 
     m = folium.Map(location=[51.513, -0.137], zoom_start=3, control_scale=True)
 
@@ -202,9 +222,10 @@ def marker_cluster_map(df):
     latitude = df.Latitude.values
     longitude = df.Longitude.values
     lat_lng = list(zip(latitude, longitude))
+    colors = [cm.spectral(float(i) / 5) for i in range(5)]
 
     for idx, (lat, lng) in enumerate(lat_lng):
-        folium.Marker(location=[lat, lng]).add_to(marker_cluster)
+        folium.Marker(location=[lat, lng], icon=folium.Icon(color=colors[df['Cluster'][idx]-1])).add_to(marker_cluster)
 
     m.save('img/maps/marker_cluster.html')
 
@@ -214,25 +235,30 @@ if __name__ == '__main__':
     df_users = pd.read_pickle('data/df_users_clustered.pkl')
     df = pd.read_pickle('data/df_clustered.pkl')
     # df_users_usa = pd.read_pickle('data/df_users_usa.pkl')
+    # df_users_usa = pd.read_pickle('data/df_users_usa.pkl')
     # df_usa = pd.read_pickle('data/df_usa.pkl')
 
     # create_map(df_users, title='first_map')
     # choropleth_map(df_usa)
-    # marker_cluster_map(df_users)
+    marker_cluster_map(df)
     # count_sims_cluster(df)
     # count_user_cluster(df)
     # bar_charts(df)
     # heat_map_users(df_users)
-    # heat_map_sims(df)
+    # heat_map_s ims(df)
     # hist_sims(df_users)
     # hist_changed_inputs(df_users)
     # time_series(df)
     # time_hist(df)
     # weekday_weekend(df)
 
-    c0 = df[df['KM_Cluster'] == 0]
-    c1 = df[df['KM_Cluster'] == 1]
-    c2 = df[df['KM_Cluster'] == 2]
-    c3 = df[df['KM_Cluster'] == 3]
-    c4 = df[df['KM_Cluster'] == 4]
-    time_hist(c4)
+    # c0 = df[df['KM_Cluster'] == 0]
+    # c1 = df[df['KM_Cluster'] == 1]
+    # c2 = df[df['KM_Cluster'] == 2]
+    # c3 = df[df['KM_Cluster'] == 3]
+    # c4 = df[df['KM_Cluster'] == 4]
+    # time_hist(c4)
+
+    # df_cleaned = remove_outliers(df_users_usa)
+    # choropleth_map(df_cleaned)
+    # cluster_bars(df_users)
