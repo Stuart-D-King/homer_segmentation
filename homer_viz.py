@@ -12,36 +12,41 @@ import scipy.stats as scs
 from homer_clean_data import remove_outliers
 
 def bar_charts(df):
-    cols = ['ImportedWind', 'ImportedSolar', 'ElectricNotDefault', 'GeneratorNotDefault', 'GenCapCost', 'BatCapCost', 'WindCapCost', 'PvCapCost']
-    clusters = np.unique(df['KM_Cluster'])
-    fig, axes = plt.subplots(2,4,figsize=(12,7))
+    cols = ['ImportedWind', 'ImportedSolar', 'Sample']
+    clusters = np.unique(df['Cluster'])
+    fig, axes = plt.subplots(1,3,figsize=(10,3.5))
     for ax, col in zip(axes.ravel(), cols):
-        grp = df.groupby('KM_Cluster')[col].mean()
+        grp = df.groupby('Cluster')[col].mean()
         ax.bar(clusters, grp, alpha=0.4, color='b')
         ax.set_xlabel('Cluster')
         ax.set_ylabel('Average ({})'.format(col))
-        ax.set_xticks(range(0, 5))
+        ax.set_xticks(range(1, 5))
+        ax.axhline(y=np.mean(df[col]), color='red', linestyle='--')
 
     # fig.suptitle('Average Number of Simulations Using a Particular Feature')
     fig.tight_layout()
     # fig.subplots_adjust(top=0.9)
-    plt.show()
+    plt.savefig('img/imports.png')
+    plt.close()
+    # plt.show()
 
 def heat_map_users(df):
     fig = plt.figure(figsize=(8,4))
     ax = fig.add_subplot(111)
-    agg = df.groupby(['KM_Cluster', 'UserRole'])['NumSims'].mean()
+    agg = df.groupby(['Cluster', 'UserRole'])['NumSims'].mean()
     ax = sns.heatmap(agg.unstack(level='UserRole'), annot=True)
     ax.set_title('Average Number of Simulations by Cluster and User Role', fontsize=14)
 
     plt.tight_layout()
+    plt.yticks(rotation='horizontal')
     plt.savefig('img/user_heatmap.png', dpi=200)
+    plt.close()
     # plt.show()
 
 def heat_map_sims(df):
     fig = plt.figure(figsize=(8,4))
     ax = fig.add_subplot(111)
-    agg = df.groupby(['KM_Cluster', 'UserRole'])['UserRole'].count()
+    agg = df.groupby(['Cluster', 'UserRole'])['UserRole'].count()
     ax = sns.heatmap(agg.unstack(level='UserRole'), annot=True)
     ax.set_title('Total Simulations by Cluster and User Role', fontsize=14)
 
@@ -50,29 +55,20 @@ def heat_map_sims(df):
 def count_sims_cluster(df):
     fig = plt.figure(figsize=(8,4))
     ax = fig.add_subplot(111)
-    sns.countplot(y='KM_Cluster', data=df, ax=ax, color="c")
+    sns.countplot(y='Cluster', data=df, ax=ax, color="c")
     plt.title('Number of Simulations per Cluster', fontsize=14)
 
     plt.tight_layout()
     plt.savefig('img/cluster_counts.png', dpi=200)
+    plt.close()
     # plt.show()
 
 def count_user_cluster(df):
     fig = plt.figure(figsize=(8,6))
     ax = fig.add_subplot(111)
-    sns.countplot(x='KM_Cluster', hue='UserRole', data=df, palette="Greens_d", ax=ax)
+    sns.countplot(x='Cluster', hue='UserRole', data=df, palette="Greens_d", ax=ax)
 
     plt.title('Number of Simulations by Cluster and User Role', fontsize=14)
-    plt.show()
-
-def hist_changed_inputs(df):
-    fig = plt.figure(figsize=(8,6))
-    ax = fig.add_subplot(111)
-
-    ax.hist(df['NumChangedInputs'], bins=20)
-    ax.set_ylabel('Frequency')
-    ax.set_xlabel('Changed Inputs')
-    ax.set_title('Histogram of Inputs Changed by User', fontsize=14)
     plt.show()
 
 def hist_sims(df):
@@ -84,11 +80,12 @@ def hist_sims(df):
     fig = plt.figure(figsize=(8,6))
     ax = fig.add_subplot(111)
 
-    ax.hist(sims, bins=20)
+    ax.hist(sims, bins=50)
     ax.set_ylabel('Frequency')
     ax.set_xlabel('Simulations')
     ax.set_title('Histogram of Simulations by User', fontsize=14)
-    plt.show()
+    plt.savefig('img/hist_sims.png', dpi=200)
+    plt.close()
 
 def time_series(df):
     fig = plt.figure(figsize=(12,6))
@@ -97,7 +94,7 @@ def time_series(df):
     date_count = df.groupby(df['Created'].dt.date)['User'].count()
     ax.plot(date_count)
     ax.set_ylabel('Number of Simulations')
-    ax.set_title('HOMER Simualtions (October 2104 - April 2017)', fontsize=14)
+    ax.set_title('HOMER Simualtions (April 2014 - April 2017)', fontsize=14)
     plt.show()
 
 def time_hist(df):
@@ -148,7 +145,7 @@ def weekday_weekend(df):
 
 def cluster_bars(df):
     # categorical vs categorical vs numeric
-    agg = df.groupby(['KM_Cluster', 'UserRole'])['UserRole'].count()
+    agg = df.groupby(['Cluster', 'UserRole'])['UserRole'].count()
     # print(agg)
     agg = agg.unstack(level='UserRole')
     # print(agg)
@@ -157,11 +154,18 @@ def cluster_bars(df):
 
     plt.title('Number of Simulations by Cluster and User Role', fontsize=14)
 
-    plt.savefig('img/sims_by_cluser_user.png', dpi=200)
+    plt.xticks(rotation='horizontal')
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
+          fancybox=True, shadow=True, ncol=4)
+    # ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    # plt.legend(loc='best')
+    # plt.tight_layout()
+    ax.set_xlabel("")
+    plt.savefig('img/sims_by_cluster_user.png', dpi=200)
     plt.close()
 
 def marker_map(df, title=None):
-    df = df[df['KM_Cluster'] == 2]
+    df = df[df['Cluster'] == 2]
 
     sizes = df.NumSims.values
     m = folium.Map(location=[51.513, -0.137], zoom_start=3, tiles='Cartodb Positron')
@@ -222,7 +226,7 @@ def marker_cluster_map(df):
     latitude = df.Latitude.values
     longitude = df.Longitude.values
     lat_lng = list(zip(latitude, longitude))
-    colors = [cm.spectral(float(i) / 5) for i in range(5)]
+    colors = [cm.spectral(float(i) / 4) for i in range(4)]
 
     for idx, (lat, lng) in enumerate(lat_lng):
         folium.Marker(location=[lat, lng], icon=folium.Icon(color=colors[df['Cluster'][idx]-1])).add_to(marker_cluster)
@@ -234,31 +238,30 @@ if __name__ == '__main__':
     plt.close('all')
     df_users = pd.read_pickle('data/df_users_clustered.pkl')
     df = pd.read_pickle('data/df_clustered.pkl')
-    # df_users_usa = pd.read_pickle('data/df_users_usa.pkl')
-    # df_users_usa = pd.read_pickle('data/df_users_usa.pkl')
+    df_users_usa = pd.read_pickle('data/df_users_usa.pkl')
     # df_usa = pd.read_pickle('data/df_usa.pkl')
 
     # create_map(df_users, title='first_map')
-    # choropleth_map(df_usa)
-    marker_cluster_map(df)
+    # choropleth_map(df_users_usa)
+    # marker_cluster_map(df)
     # count_sims_cluster(df)
     # count_user_cluster(df)
-    # bar_charts(df)
+    bar_charts(df)
     # heat_map_users(df_users)
-    # heat_map_s ims(df)
+    # heat_map_sims(df)
     # hist_sims(df_users)
     # hist_changed_inputs(df_users)
     # time_series(df)
     # time_hist(df)
     # weekday_weekend(df)
 
-    # c0 = df[df['KM_Cluster'] == 0]
-    # c1 = df[df['KM_Cluster'] == 1]
-    # c2 = df[df['KM_Cluster'] == 2]
-    # c3 = df[df['KM_Cluster'] == 3]
-    # c4 = df[df['KM_Cluster'] == 4]
+    # c0 = df[df['Cluster'] == 0]
+    # c1 = df[df['Cluster'] == 1]
+    # c2 = df[df['Cluster'] == 2]
+    # c3 = df[df['Cluster'] == 3]
+    # c4 = df[df['Cluster'] == 4]
     # time_hist(c4)
 
     # df_cleaned = remove_outliers(df_users_usa)
     # choropleth_map(df_cleaned)
-    # cluster_bars(df_users)
+    # cluster_bars(df)

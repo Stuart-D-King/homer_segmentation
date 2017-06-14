@@ -11,16 +11,16 @@ from homer_cluster import one_hot, prep_kmodes
 import pdb
 
 
-def cluster_and_plot(X, n_clusters, model='AG', title='users'):
+def plot_silhouette(df, X, n_clusters, model='AG', title='users'):
     '''
-    X: must be dense array or pandas dataframe
+    df: must be dense array or pandas dataframe
     '''
     fig = plt.figure(figsize=(8,6))
     ax = fig.add_subplot(111)
 
     ax.set_xlim([-0.6, 1])
     # Insert blank space between silhouette plots of individual clusters
-    ax.set_ylim([0, len(X) + (n_clusters + 1) * 10])
+    ax.set_ylim([0, len(df) + (n_clusters + 1) * 10])
 
     # Initialize clusterer and set random state, if possible
     if model == 'AG':
@@ -29,7 +29,7 @@ def cluster_and_plot(X, n_clusters, model='AG', title='users'):
 
     elif model == 'KM':
         clusterer = kmodes.KModes(n_clusters=n_clusters, n_init=5, init='Huang', verbose=1)
-        labels = clusterer.fit_predict(X)
+        labels = clusterer.fit_predict(df)
 
     elif model == 'GM':
         clusterer = GaussianMixture(n_components=n_clusters, covariance_type='tied', max_iter=20, n_init=50, random_state=42, verbose=1).fit(X)
@@ -74,7 +74,7 @@ def cluster_and_plot(X, n_clusters, model='AG', title='users'):
     plt.savefig('img/silhouette/sil_{}_{}_{}.png'.format(clusterer.__class__.__name__, n_clusters, title), dpi=200)
     plt.close()
 
-def get_silhouette_score(X, n_clusters, model='AG'):
+def get_silhouette_score(df, X, n_clusters, model='AG'):
     '''
     X: must be dense array or pandas dataframe
     '''
@@ -86,7 +86,7 @@ def get_silhouette_score(X, n_clusters, model='AG'):
 
     elif model == 'KM':
         clusterer = kmodes.KModes(n_clusters=n_clusters, n_init=5, init='Huang', verbose=1)
-        labels = clusterer.fit_predict(X)
+        labels = clusterer.fit_predict(df)
         sil_avg = silhouette_score(X, labels, metric='hamming')
 
     elif model == 'GM':
@@ -96,11 +96,11 @@ def get_silhouette_score(X, n_clusters, model='AG'):
 
     return sil_avg
 
-def plot_sil_scores(X, model, title='users'):
+def plot_sil_scores(df, X, model, title='users'):
     fig = plt.figure(figsize=(8,6))
     ax = fig.add_subplot(111)
 
-    sil_scores = [get_silhouette_score(X, i, model) for i in range(3,9)]
+    sil_scores = [get_silhouette_score(df, X, i, model) for i in range(3,9)]
     ax.plot(range(3,9), sil_scores)
     ax.set_xlabel('Number of Clusters')
     ax.set_ylabel('Silhouette Score')
@@ -121,8 +121,8 @@ if __name__ == '__main__':
     X_users = one_hot(df_users)
 
     # for i in range(3, 9):
-        # cluster_and_plot(df_users_km, n_clusters=i, model='KM')
+    #     plot_silhouette(df_users_km, X_users.todense(), n_clusters=i, model='KM')
         # cluster_and_plot(X_users.toarray(), n_clusters=i, model='AG')
 
-    # plot_sil_scores(df_users_km, model='KM')
+    # plot_sil_scores(df_users_km, X_users.todense(), model='KM')
     # plot_sil_scores(X_users.toarray(), model='AG')

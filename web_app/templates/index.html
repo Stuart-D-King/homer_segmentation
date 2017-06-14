@@ -25,6 +25,37 @@
 
     <!-- Custom styles for this template -->
     <link href="../static/css/carousel.css" rel="stylesheet">
+
+    <style>
+    table {
+    font-family: arial, sans-serif;
+    width: 70%;
+    margin: 15px;
+    }
+
+    td, th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #dddddd;
+    }
+
+    table.dataframe, .dataframe th, .dataframe td {
+        border: 1px solid #dddddd;
+        /*border-bottom: 1px solid #C8C8C8;*/
+        border-collapse: collapse;
+        text-align:left;
+        padding: 8px;
+        margin-bottom: 20px;
+        /*font-size: 0.9em;*/
+        width: 50%;
+      }
+
+    </style>
+
   </head>
 <!-- NAVBAR
 ================================================== -->
@@ -45,12 +76,13 @@
             </div>
             <div id="navbar" class="navbar-collapse collapse">
               <ul class="nav navbar-nav">
-                <li class="active"><a href="#">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#clusters">Results</a></li>
-                <li><a href="#graphics">Graphics</a></li>
+                <li class="active"><a href="/">Home</a></li>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#results">Results</a></li>
+                <li><a href="#mapcreator">Map Creator</a></li>
                 <li><a href="#contact">Contact</a></li>
                 <li><a href="http://www.homerenergy.com/" target="_blank">HOMER Energy</a></li>
+                <li><a href="https://www.galvanize.com/denver-golden-triangle/data-science" target="_blank">Galvanize</a></li>
               </ul>
             </div>
           </div>
@@ -59,177 +91,329 @@
       </div>
     </div>
 
-
     <!-- Carousel
     ================================================== -->
     <div id="myCarousel" class="carousel slide" data-ride="carousel" data-interval="false">
-      <!-- Indicators -->
-      <!-- <ol class="carousel-indicators">
-        <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-        <li data-target="#myCarousel" data-slide-to="1"></li>
-        <li data-target="#myCarousel" data-slide-to="2"></li>
-      </ol> -->
+
       <div class="carousel-inner" role="listbox">
         <div class="item active">
-          <img src="../static/img/solarpanels.jpg" alt=""/>
+          <img src="../static/img/turbines_2.jpg" alt=""/>
           <div class="container">
             <div class="carousel-caption">
               <h1>Microgrid Customer Segmentation</h1>
-              <p>A research project in collaboration with HOMER Energy using machine learning techniques to segment customers and gather business intelligence.</p>
+              <p>A research project in collaboration with HOMER Energy using clustering techniques to segment customers and gather business intelligence.</p>
               <p>HOMER Energy is a world leader in accurately modeling microgrid optimization, and its software allows users to understand how to build cost effective and reliable microgrids that combine traditionally generated and renewable power, storage, and load management.</p>
               <p><a class="btn btn-lg btn-primary" href="http://www.homerenergy.com/" target="_blank" role="button">Check out HOMER</a></p>
             </div>
           </div>
         </div>
-        <!-- <div class="item">
-          <img src="../static/img/solarpanels.jpg" alt=""/>
-          <div class="container">
-            <div class="carousel-caption">
-              <h1>Data Science at Galvanize</h1>
-              <p>Learn more about how Galvanize's immersive educaiton program prepares students to tackle tough business and research challenges with data science.</p>
-              <p><a class="btn btn-lg btn-primary" href="https://www.galvanize.com/denver-golden-triangle/data-science" role="button">Check out galvanize</a></p>
-            </div>
-          </div>
-        </div>
-        <div class="item">
-          <img src="../static/img/solarpanels.jpg" alt=""/>
-          <div class="container">
-            <div class="carousel-caption">
-              <h1>What is Clustering?</h1>
-              <p>Most statistical learning problems are supervised, meaning from a set of observation we are trying to predict a known outcome or target. However, when a target is unavailable, we are faced with an <i>unsupervised</i> problem. Enter clustering algorithms... </p>
-              <p><a class="btn btn-lg btn-primary" href="#" role="button">Learn more</a></p>
-            </div>
-          </div>
-        </div>
-      </div> -->
-      <!-- <a class="left carousel-control" href="#myCarousel" role="button" data-slide="prev">
-        <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-        <span class="sr-only">Previous</span>
-      </a>
-      <a class="right carousel-control" href="#myCarousel" role="button" data-slide="next">
-        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
-        <span class="sr-only">Next</span>
-      </a> -->
-    </div><!-- /.carousel -->
+      </div>
+    </div>
 
-    <hr class="featurette-divider">
+        <!-- <hr class="featurette-divider"> -->
 
-    <!-- Marketing messaging and featurettes
-    ================================================== -->
-    <!-- Wrap the rest of the page in another container to center all the content. -->
+      <!-- Marketing messaging and featurettes
+      ================================================== -->
+      <!-- Wrap the rest of the page in another container to center all the content. -->
 
     <div class="container marketing">
 
       <!-- Three columns of text below the carousel -->
       <div class="row">
         <div class="col-lg-4">
+          <a href="#overview">
           <i class="fa fa-compass" style="font-size:80px" aria-hidden="true"></i>
+          </a>
           <h2>Project Overview</h2>
           <p>Understand the genesis of this project, what it hoped to accomplish, and where we go from here.</p>
-          <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
+          <!-- <p><a class="btn btn-default" href="#overview" role="button">View details &raquo;</a></p> -->
         </div><!-- /.col-lg-4 -->
         <div class="col-lg-4">
+          <a href="#results">
           <i class="fa fa-line-chart" style="font-size:80px" aria-hidden="true"></i>
+          </a>
           <h2>Results!</h2>
           <p>Read the customer profiles developed as a result of the project's results and see other visualizations created.</p>
-          <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
+          <!-- <p><a class="btn btn-default" href="#results" role="button">View details &raquo;</a></p> -->
         </div><!-- /.col-lg-4 -->
         <div class="col-lg-4">
+          <a href="#techstack">
           <i class="fa fa-cogs" style="font-size:80px" aria-hidden="true"></i>
+          </a>
           <h2>Technology Stack</h2>
           <p>Find out what technologies and software packages were used to create this project.</p>
-          <p><a class="btn btn-default" href="#tech stack" role="button">View details &raquo;</a></p>
+          <!-- <p><a class="btn btn-default" href="#techstack" role="button">View details &raquo;</a></p> -->
         </div><!-- /.col-lg-4 -->
       </div><!-- /.row -->
+    </div>
 
-      <!-- START THE FEATURETTES -->
+    <hr class="featurette-divider">
 
-      <hr class="featurette-divider">
+    <section id="overview">
+      <div class="container">
+        <h2>Project Overview</h2>
+        <a href="#">Back to top</a>
+        <h3>Objective</h3>
+        <p>HOMER Energy is a world leader in accurately modeling microgrid optimization. The HOMER (Hybrid Optimization of Multiple Energy Resources) software allows users to understand how to build cost effective and reliable microgrids that combine traditionally generated and renewable power, storage, and load management. HOMER Energy also offers software training, microgrid consulting expertise, and market access support to its vendor partners.</p>
 
-      <div class="row featurette">
-        <div class="col-md-7">
-          <h2 class="featurette-heading">Data Science at Galvanize. <span class="text-muted">Hang on for dear life.</span></h2>
-          <p class="lead">Learn more about how Galvanize's immersive education program prepares students to tackle tough business and research challenges with data science.</p>
-          <p><a class="btn btn-default" href="https://www.galvanize.com/denver-golden-triangle/data-science" target="_blank" role="button">Check out Galvanize &raquo;</a></p>
-        </div>
-        <div class="col-md-5">
-          <img class="featurette-image img-responsive center-block" src="../static/img/galvanize.jpg" alt="Galvanize" style="width:550px;height:325px";>
-        </div>
+        <p>As the microgrid market continues to expand, HOMER and its vendor partners needs to better understand its software users' behavior and intensions. The objective of this study is to extract structure and meaning from HOMER Energy's collection of user software simulations. By being able to segment its customer base, HOMER can enhance the market access branch of its business model by providing its vendor partners with more reliable information related to the micrgrid consumer market. Understanding which software users more likely to initialize micogrids is information all vendors want to know to better target those customers ready to get started.</p>
       </div>
 
-      <hr class="featurette-divider">
-
-      <div class="row featurette">
-        <div class="col-md-7 col-md-push-5">
-          <h2 class="featurette-heading">Oh yeah, I've got pretty plots too. <span class="text-muted">See for yourself.</span></h2>
-          <p class="lead">Check out the plots, charts, and maps used to better understand HOMER Energy's software users and extract meaningful business intelligence.</p>
-          <p><a class="btn btn-default" href="#" role="button">See the plots &raquo;</a></p>
-        </div>
-        <div class="col-md-5 col-md-pull-7">
-          <img class="featurette-image img-responsive center-block" src="../static/img/east_coast.png" alt="US Heatmap" style="width:550px;height:300px";>
-        </div>
+      <div class="container">
+        <h3>Process</h3>
+        <h4>Data Preprocessing</h4>
+        <p>The first and very important step in my process was to understand the data and prepare it for modeling. The HOMER software is extremely powerful and capable of modeling hundreds of microgird configurations at once. Because the software has predictive capabilities built into it, my task was to understand which features in the data space would be insightful for determining the realness or seriousness of a user. Initial features were selected based on consultations with my HOMER counterpart, Jordan Esbin, as well as my participation in HOMER's oneline software training series. After selecting the appropriate user input features, I performed a variety of data munging and cleaning steps using the Pandas data analysis library. For example, I bucketed the User Role and Organization Type variables into categories such as academic, business, technical, and undefined, and categorized whether or not a user modeled certain types of energy hardware. This extensive data cleaning step reduced the features space from 144 variables to 15. Final model features include:</p>
+        <table>
+          <tr>
+            <th>Feature</th>
+            <th>Description</th>
+            <th>Data Type</th>
+          </tr>
+          <tr>
+            <td>UserID</td>
+            <td>Six-digit numeric ID for each user</td>
+            <td>String</td>
+          </tr>
+          <tr>
+            <td>NumSims</td>
+            <td>Number of simulations for each users from April 2014 to April 2017</td>
+            <td>Integer</td>
+          </tr>
+          <tr>
+            <td>UserRole</td>
+            <td>User identified professional occupation</td>
+            <td>String</td>
+          </tr>
+          <tr>
+            <td>OrganizaitonType</td>
+            <td>User identified employment field</td>
+            <td>String</td>
+          </tr>
+          <tr>
+            <td>Latitude</td>
+            <td>Latitude coordinate of simulated project</td>
+            <td>Float</td>
+          </tr>
+          <tr>
+            <td>Longitude</td>
+            <td>Longitude coordinate of simulated project</td>
+            <td>Float</td>
+          </tr>
+          <tr>
+            <td>MultiGenSearch</td>
+            <td>If applicable, if the user simulated a variety of generator models</td>
+            <td>Category</td>
+          </tr>
+          <tr>
+            <td>MultiWindSearch</td>
+            <td>If applicable, if the user simulated a variety of wind turbine models</td>
+            <td>Category</td>
+          </tr>
+          <tr>
+            <td>MultiBatSearch</td>
+            <td>If applicable, if the user simulated a variety of battery quantities</td>
+            <td>Category</td>
+          </tr>
+          <tr>
+            <td>MultiPvSearch</td>
+            <td>If applicable, if the user simulated a variety of solar panel configurations</td>
+            <td>Category</td>
+          </tr>
+          <tr>
+            <td>MultiConSearch</td>
+            <td>If applicable, if the user simulated a variety of converter configurations</td>
+            <td>Category</td>
+          </tr>
+          <tr>
+            <td>Sample</td>
+            <td>Whether a sample file was used in the simulation</td>
+            <td>Boolean</td>
+          </tr>
+          <tr>
+            <td>DefaultGenerator</td>
+            <td>If applicable, if the user used the defaualt generator model in the simulation</td>
+            <td>Category</td>
+          </tr>
+          <tr>
+            <td>ImportedWind</td>
+            <td>If the user opted to import wind data in lieu of using the default parameters</td>
+            <td>Boolean</td>
+          </tr>
+          <tr>
+            <td>ImportedSolar</td>
+            <td>If the user opted to import solar data in lieu of using the default parameters</td>
+            <td>Boolean</td>
+          </tr>
+          <tr>
+            <td>Country</td>
+            <td>Country of the simulated project</td>
+            <td>Category</td>
+          </tr>
+        </table>
       </div>
 
-      <hr class="featurette-divider">
-
-      <div class="row featurette">
-        <div class="col-md-7">
-          <h2 class="featurette-heading">Clustering...<span class="text-muted">what is it exactly?</span></h2>
-          <p class="lead">Most statistical learning problems are supervised, meaning from a set of observation we are trying to predict a known outcome or target. However, when a target is unavailable, we are faced with an <i>unsupervised</i> problem and clustering can be our friend.</p>
-          <p><a class="btn btn-default" href="#" role="button">Learn more &raquo;</a></p>
-        </div>
-        <div class="col-md-5">
-          <img class="featurette-image img-responsive center-block" src="../static/img/cluster_plot.png" alt="Cluster Plots" style="width:550px;height:400px";>
-        </div>
+      <div class="container">
+        <h4>Model Development</h4>
+        <p>Because HOMER does not currently have a way of tracking which of its software users have become microgrid implementers, I explored various unsuperivsed clustering algorithms to model the underlying structure of the data. KMeans is a common clustering algorithm that groups data according to existing similarities. However, because the similarity metric used in KMeans is the computed euclidean distance between each data point and the centroids of each cluster, the KMeans algorthim is not appropriate for non-numerical data. A more appropriate clustering algorithm is KModes. KModes is an extension of KMeans, however, instead of calculating distance, it quantifies the total number of mismatched categoreis between two objects: the small ther number, the more similar the two objects. In addition, KModes uses modes instead of means, in which the mode is a vector of elements that minimizes the dissimilarities between the vector and an individual data point.</p>
+        <p>Other unsupervised clustering algorithms were also tested on the data, including hierarchical agglomerative clustering and gaussian mixture models. To test these algorithms, I used one-hot encoding to further transform the feature space into binary/dummy variables. Both algorithms produced clustered results, however, the interpretability of the clusters was compromised due to the inherent non-numerical nature of the data. For this reason, I settled on KModes as the algorithm to formulate my findings. You can read more about KModes clustering in Zhexue Huang's <a href="http://arbor.ee.ntu.edu.tw/~chyun/dmpaper/huanet98.pdf">research paper</a> on the topic.</p>
       </div>
 
-      <hr class="featurette-divider">
+      <div class="container">
+        <p>Once the cluster algorithm was selected, I needed to determine the appropriate amount of clusters to segment the data. In KMeans clustering, it is common to perform a dimensionality reduction technique such as principle component analysis (PCA) to plot the resulting clusters in a two dimensional space to visually confirm clustering is taking place. However, because applying PCA to categorical data is generally regarded as unwise, I instead opted to calcuate a silhouette score based on a hamming distance metric for a range of cluster quantities to settle on the most appropriate number of customer segments. When calcuating the silhouette coefficient, the best possible value is 1, indicating all data points are perfected groupped and there are no overlapping clusters. A coefficient of 0 implies overlapping clusters, and negative values suggest that a sample has been assigned to the wrong cluster. Based on the below graphics, I decided to cluster my data into four clusters. I selected k=4 because the silhouette score was only slightly lower than k=3, and based on my conversations with HOMER four customer segments fit aligned closely with expected user types. Furthermore, while the silhouette score for k=7 was also similar, I ultimately decided an analysis of seven customer segments would be more appropriate for future analysis.
+      </div>
 
-      <!-- /END THE FEATURETTES -->
+      <div class="container">
+        <img src="../static/img/sil_v_clust_KM_users.png" style="float: left; width: 49%; margin-right: 1%; margin-bottom: 0.5em;">
+        <img src="../static/img/sil_KModes_4_users.png" style="float: left; width: 49%; margin-right: 1%; margin-bottom: 0.5em;">
+      </div>
 
-      <selction id="tech stack">
-        <div class="container">
-          <div class="col-lg-8 col-lg-offset-2 text-center">
-            <h2 class="section-heading">Technology Stack</h2>
-            <p class="lead">The following software packages and technologies were used in this project.</p>
+      <div class="container">
+        <p>After selecting the appropriate number of clusters I fitted the KModes clustering algorithm to my data and assigned cluster labels to each user. The cluster labels were then mapped back to the full dataset of all simulations using the user's ID as the pairing key. I then performed my initial exploratory data analysis to begin extracting meaningful business intelligence from the clusters.</p>
+      </div>
+    </section>
+
+    <hr class="featurette-divider">
+
+    <section id="results">
+      <div class="container">
+        <h2>Results</h2>
+        <a href="#">Back to top</a>
+        <h4>Exploratory Data Analysis</h4>
+        <div>
+          <p>Before examining each user cluster, I took a look at the full simulations dataframe to gather baseline statistics. The breakdown of users by user type is shown below.</p>
+          <p>{{user_table|safe}}</p>
+          <p>And by organization type:</p>
+          <p>{{org_table|safe}}</p>
+          <p>As is evident from the above tables, the greatest majority of users work in the academic field or for an academic institution. On the whole, HOMER does not consider academic users to be likely to become real microgrid implementers.</p>
+        </div>
+
+        <div>
+          After assigning cluster labels to each user using KModes, we can see that the total number of simulations is fairly well distributed among the four clusters.</p>
+          <div class="container">
+            <img src="../static/img/cluster_counts.png" style="float: left; width: 50%; margin-right: 0%; margin-bottom: 0.5em;">
           </div>
         </div>
 
-      <hr class="featurette-divider">
-
-      <section id="contact">
-        <div class="container">
-          <div class="col-lg-8 col-lg-offset-2 text-center">
-            <h2 class="section-heading">Contact Me</h2>
-            <p class="lead">Please feel free to contact me with questions or comments. You can also check out my GitHub repo for a more in-depth look at the code developed for this project.</p>
-          </div>
-        </div>
-
-        <div class="container">
-          <div class="row">
-            <div class="col-lg-4">
-              <i class="fa fa-linkedin-square" style="font-size:50px" aria-hidden="true"></i>
-              <p><a style='color:black' href="http://linkedin.com/in/stuart-d-king" target="_blank">linkedin.com</a></p>
-            </div>
-            <div class="col-lg-4">
-              <i class="fa fa-envelope" style="font-size:45px" aria-hidden="true"></i>
-              <p><a style="color:black" href="mailto:sdking49@gmail.com">sdking49@gmail.com</a></p>
-            </div>
-            <div class="col-lg-4">
-              <i class="fa fa-github" style="font-size:50px" aria-hidden="true"></i>
-              <p><a style="color:black" href="https://github.com/stuart-d-king/homer_segmentation" target="_blank">Github Repo</a></p>
+          <div>
+            <p>Looking at the distribution of user types in each cluster, we can see that the KModes has clustered the vast majority of technical users in cluster #4, with academic users being almost equally distributed among clusters 1-3.</p>
+            <div class="container">
+              <img src="../static/img/sims_by_cluster_user.png" style="float: left; width: 70%; margin-right: 0%; margin-bottom: 0.5em;">
             </div>
           </div>
+
+          <div>
+            <p>Similarly, the majority of simulations run by members/employees of engineering organizations have found their way into cluster #4.</p>
+            <div class="container">
+              <img src="../static/img/sims_by_cluster_org.png" style="float: left; width: 70%; margin-right: 0%; margin-bottom: 0.5em;">
+            </div>
+          </div>
+
+          <div>
+            <p>Because the data had also been grouped by user using each user's most common inputs as feature values, I reviewed the distribution of the number of simulations by user. A basic histogram of simulations by user demonstrates the high frequency of ten or less simulations by user, however, some users are running many more simulations, which are likely more serioius users who are modeling many microgrid configurations.
+            <div class="container">
+              <img src="../static/img/hist_sims.png" style="float: left; width: 60%; margin-right: 0%; margin-bottom: 0.5em;">
+            </div>
+          </div>
+
+          <div>
+            <p>Diving deeeper into the number of simulations by user, the below heat map displays the average number of simulations by user type in each cluster. Business users on average are running more simulations than other users in each cluster, but techincal users dominate cluster #4, which aligns with our expecations based on the distribution of users in each cluster.
+            <div class="container">
+              <img src="../static/img/user_heatmap.png" style="float: left; width: 60%; margin-right: 0%; margin-bottom: 0.5em;">
+            </div>
+          </div>
+
+          <div>
+            <p>Other important input variables identified by HOMER are whether a user has imported her own wind or solar location metrics, and whether a user opts to use HOMER's default sample file. The act of importing more precise weather data is viewed favorably in regards to the user's seriousness of turning a simulation into a real project. Similarly, HOMER does not consider a simulation run using its deflaut sample file to correlate with project realness.</p>
+            <p>The below bar graphs show the mean feature usage for imported solar, imported wind, and sample file usage in each cluster. For imported wind, we see that cluster #2 simulations are the most likely to import this data, with 10 percent of simulations importing solar data. For imported solar, cluster #4 has the highest average (10 percent) for using that particular feature. Regarding the usage of the default sample file, cluster #2 uses HOMER's sample file more often than the other clusters, although it should be noted the relative usage is still low at just over 1.6 percent.
+            <div class="container">
+              <img src="../static/img/imports.png" style="float: left; width: 75%; margin-right: 0%; margin-bottom: 0.5em;">
+            </div>
+
+          <div>
+            <p>HOMER also considers the extent to which a user interacts with its software as a strong indicator of the user's/simulation's realness. For each simulation, a user is able to specify what energy hardware (e.g. batteries, turbines, solar panels, etc.) she would like to model, as well a range of hardward specifications for the software to compare and output an optimized microgrid (optimization is defined by the the lowest net present cost of microgrid system). Per conversations with HOMER, a rough metric to judge a user's interaction is whether the user provides more than two different hardware specifications to test. For this reason, I crafted a series of features that checks whether a user modeled a certain piece of hardware, and if so, if the simulations was run with multiple hardware specifications for that particular hardware category.</p>
+            <p>For generators, the breakdown of simulations that modeled generators, and if more than two generator sizes were tested is as follows.</p>
+            <p><b>Key:</b></p>
+            <p>True = generator modeled and more than two sizes tested</p>
+            <p>False = generator modeled, but less than two sizes tested</p>
+            <p>NA = no generator modeled</p>
+            <p>{{df_gen|safe}}</p>
+            <p>For wind turbines:</p>
+            <p>{{df_wind|safe}}</p>
+            <p>For batteries:</p>
+            <p>{{df_bat|safe}}</p>
+            <p>For solar panels (PV):</p>
+            <p>{{df_pv|safe}}</p>
+            <p>For converters:</p>
+            <p>{{df_con|safe}}</p>
+
+        <h3>Cluster Profiles</h3>
+        <h4>Cluster #1</h4>
+      </div>
+    </section>
+
+    <hr class="featurette-divider">
+
+    <section id="mapcreator">
+      <div class="container">
+        <h2>Choropleth Map Creator</h2>
+        <a href="#">Back to top</a>
+        <h4>Make a choropleth map of the number of software simulations by county in the United States</h4>
+        <p>Which user cluster do you want to map? Enter '0' if you want to map all users.</p>
+        <form action='/show_map' method='POST' id='submitform'>
+          <input type='text',  name='user_input'>
+          <input type='submit' value="Show me my map!"/>
+        </form>
+      </div>
+    </section>
+
+    <hr class="featurette-divider">
+
+    <section id="techstack">
+      <div class="container">
+        <div class="col-lg-8 col-lg-offset-2 text-center">
+          <h2 class="section-heading">Technology Stack</h2>
+          <a href="#">Back to top</a>
+          <p class="lead">The following software packages and technologies were used in this project.</p>
+          <img src="../static/img/stack.png" alt="" style="width:700px;height:700px";>
         </div>
-      </section>
+      </div>
+    </section>
+
+    <hr class="featurette-divider">
+
+    <section id="contact">
+      <div class="container">
+        <div class="col-lg-8 col-lg-offset-2 text-center">
+          <h2 class="section-heading">Contact Me</h2>
+          <p class="lead">Please feel free to contact me with questions or comments. You can also check out my GitHub repo for a more in-depth look at the code developed for this project.</p>
+        </div>
+      </div>
+
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-4 text-center">
+            <i class="fa fa-linkedin-square" style="font-size:50px" aria-hidden="true"></i>
+            <p><a style='color:black' href="http://linkedin.com/in/stuart-d-king" target="_blank">linkedin.com</a></p>
+          </div>
+          <div class="col-lg-4 text-center">
+            <i class="fa fa-envelope" style="font-size:45px" aria-hidden="true"></i>
+            <p><a style="color:black" href="mailto:sdking49@gmail.com">sdking49@gmail.com</a></p>
+          </div>
+          <div class="col-lg-4 text-center">
+            <i class="fa fa-github" style="font-size:50px" aria-hidden="true"></i>
+            <p><a style="color:black" href="https://github.com/stuart-d-king/homer_segmentation" target="_blank">Github Repo</a></p>
+          </div>
+        </div>
+      </div>
+    </section>
 
       <!-- FOOTER -->
-      <footer>
-        <p class="pull-right"><a href="#">Back to top</a></p>
-        <p>&copy; 2016 Stuart King &middot; <a href="#">Privacy</a> &middot; <a href="#">Terms</a></p>
-      </footer>
+    <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+      <p>&copy; 2017 Stuart King</p>
+    </footer>
 
-    </div><!-- /.container -->
+  </div><!-- /.container -->
 
 
     <!-- Bootstrap core JavaScript

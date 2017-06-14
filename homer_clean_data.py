@@ -9,7 +9,8 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 
 def read_data():
-    df = pd.read_csv('data/combined_grid_and_run_data.csv', encoding='iso-8859-1')
+    # df = pd.read_csv('data/combined_grid_and_run_data.csv', encoding='iso-8859-1')
+    df = pd.read_csv('output.csv')
 
     cols = ['UserRole',
             'OrganizationType',
@@ -17,6 +18,7 @@ def read_data():
             'Longitude',
             'User',
             'Created',
+            'Sample',
             'Generator0',
             'Generator0SearchSpace',
             'WindTurbine0',
@@ -36,6 +38,7 @@ def read_data():
     print('Cleaning columns...')
     # change type of 'Created' to datetime
     df['Created'] = pd.to_datetime(df['Created'])
+    df = df[df['Created'].dt.year > 2004]
 
     # clean 'UserRole'
     df['UserRole'] = df['UserRole'].replace(['Student', 'Undergraduate Student', 'Post-graduate Student', 'Tenured or Tenure-track Faculty', 'Faculty', 'Research Staff'], 'Academic')
@@ -78,8 +81,11 @@ def read_data():
     df['MultiConSearch'] = np.where(df['Converter'].notnull(), df['ConverterSearchSpace'].astype(str).apply(lambda x: x.split('|')).apply(lambda x: len(x) > 2), 'NA')
 
     # create new 'GeneratorDefault' column
-    df['DefaultGenerator'] = np.where(df['Generator0'] == 'Autosize Genset', True, False)
+    # df['DefaultGenerator'] = np.where(df['Generator0'] == 'Autosize Genset', True, False)
     df['DefaultGenerator'] = np.where(df['Generator0'].notnull(), np.where(df['Generator0'] == 'Autosize Genset', True, False), 'NA')
+
+    # clean 'Sample'; if a sample is used = True, else = False
+    df['Sample'] = np.where(df['Sample'].notnull(), True, False)
 
     # drop columns no longer needed
     for col in ['Generator0', 'Generator0SearchSpace', 'WindTurbine0', 'WindTurbine0SearchSpace', 'Battery0', 'Battery0SearchSpace', 'Pv0', 'Pv0SearchSpace', 'Converter', 'ConverterSearchSpace']:
@@ -104,7 +110,7 @@ def read_data():
 
     print('Converting booleans to integers...')
     # convert boolean columns to int type
-    bool_cols = ['ImportedWind', 'ImportedSolar', 'DefaultGenerator']
+    bool_cols = ['ImportedWind', 'ImportedSolar', 'Sample']
 
     for col in bool_cols:
         if df[col].dtype != bool:
@@ -148,6 +154,7 @@ def create_user_df(df):
             'MultiBatSearch',
             'MultiPvSearch',
             'MultiConSearch',
+            'Sample',
             'DefaultGenerator',
             'ImportedWind',
             'ImportedSolar'
@@ -212,10 +219,10 @@ def get_fips_codes(df):
 
     fips_codes = []
     for lat, lng in zip(latitude, longitude):
-        url = 'http://data.fcc.gov/api/block/find?latitude={}&longitude={}&showall=true'.format(lat, lng)
-        content = requests.get(url).content
-        root = ET.fromstring(content)
         try:
+            url = 'http://data.fcc.gov/api/block/find?latitude={}&longitude={}&showall=true'.format(lat, lng)
+            content = requests.get(url).content
+            root = ET.fromstring(content)
             fips_codes.append(root[1].attrib['FIPS'])
         except:
             fips_codes.append(0)
@@ -239,8 +246,8 @@ if __name__ == '__main__':
     df_users.to_pickle('data/df_users.pkl')
 
     # ---Read back in pickled dataframes---
-    df = pd.read_pickle('data/df.pkl')
-    df_users = pd.read_pickle('data/df_users.pkl')
+    # df = pd.read_pickle('data/df.pkl')
+    # df_users = pd.read_pickle('data/df_users.pkl')
 
     # AFTER CLUSTERING
     # ---Read in clustered dataframes---

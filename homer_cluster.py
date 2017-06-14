@@ -19,25 +19,18 @@ def one_hot(df_):
 
     cols_to_keep = ['UserRole',
                     'OrganizationType',
+                    'MultiGenSearch',
+                    'MultiWindSearch',
+                    'MultiBatSearch',
+                    'MultiPvSearch',
+                    'MultiConSearch',
+                    'Sample',
+                    'DefaultGenerator',
                     'ImportedWind',
-                    'ImportedSolar',
-                    'GenCostMultiLines',
-                    'WindCostMultiLines',
-                    'BatCostMultiLines',
-                    'PvCostMultiLines',
-                    'ConCostMultiLines',
-                    'ElectricNotDefault',
-                    'GeneratorNotDefault',
-                    'GenCapCost',
-                    'BatCapCost',
-                    'WindCapCost',
-                    'PvCapCost'
+                    'ImportedSolar'
                     ]
 
     df = df[cols_to_keep]
-
-    df['UserRole'] = df['UserRole'].astype(object)
-    df['OrganizationType'] = df['OrganizationType'].astype(object)
 
     le = LabelEncoder()
     enc_dct = dict()
@@ -77,26 +70,21 @@ def prep_kproto(df_):
     cols_to_keep = ['NumSims',
                     'UserRole',
                     'OrganizationType',
+                    'MultiGenSearch',
+                    'MultiWindSearch',
+                    'MultiBatSearch',
+                    'MultiPvSearch',
+                    'MultiConSearch',
+                    'Sample',
+                    'DefaultGenerator',
                     'ImportedWind',
-                    'ImportedSolar',
-                    'GenCostMultiLines',
-                    'WindCostMultiLines',
-                    'BatCostMultiLines',
-                    'PvCostMultiLines',
-                    'ConCostMultiLines',
-                    'ElectricNotDefault',
-                    'GeneratorNotDefault',
-                    'GenCapCost',
-                    'BatCapCost',
-                    'WindCapCost',
-                    'PvCapCost',
-                    'NumChangedInputs'
+                    'ImportedSolar'
                     ]
 
     df = df[cols_to_keep]
 
     # convert 1/0 int columns to boolen type
-    bool_cols = ['ImportedWind', 'ImportedSolar', 'GenCostMultiLines', 'WindCostMultiLines', 'BatCostMultiLines', 'PvCostMultiLines', 'ConCostMultiLines', 'ElectricNotDefault', 'GeneratorNotDefault', 'GenCapCost', 'BatCapCost', 'WindCapCost', 'PvCapCost']
+    bool_cols = ['ImportedWind', 'ImportedSolar', 'Sample']
 
     for col in bool_cols:
         df[col] = df[col].astype(bool)
@@ -124,6 +112,7 @@ def prep_kmodes(df_):
                     'MultiBatSearch',
                     'MultiPvSearch',
                     'MultiConSearch',
+                    'Sample',
                     'DefaultGenerator',
                     'ImportedWind',
                     'ImportedSolar'
@@ -143,13 +132,13 @@ def prep_kmodes(df_):
 
     return df
 
-def run_kproto(X, cat_cols, init_method='Cao', n_clusters=5):
-    kp = kprototypes.KPrototypes(n_clusters=n_clusters, init=init_method, n_init=5, max_iter=5, verbose=2)
+def run_kproto(X, cat_cols, init_method='Cao', n_clusters=4):
+    kp = kprototypes.KPrototypes(n_clusters=n_clusters, init=init_method, n_init=10, max_iter=5, verbose=2)
     labels = kp.fit_predict(X, categorical=cat_cols)
     return kp, labels
 
-def run_kmodes(X, init_method='Huang', n_clusters=5):
-    km = kmodes.KModes(n_clusters=n_clusters, n_init=5, init=init_method, verbose=1)
+def run_kmodes(X, init_method='Huang', n_clusters=4):
+    km = kmodes.KModes(n_clusters=n_clusters, n_init=10, init=init_method, verbose=1)
     labels = km.fit_predict(X)
     return km, labels
 
