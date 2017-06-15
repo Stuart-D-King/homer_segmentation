@@ -7,10 +7,12 @@ import requests
 import reverse_geocoder as rg
 import xml.etree.ElementTree as ET
 from collections import defaultdict
+import geocoder
+import pycountry
 
 def read_data():
     # df = pd.read_csv('data/combined_grid_and_run_data.csv', encoding='iso-8859-1')
-    df = pd.read_csv('output.csv')
+    df = pd.read_csv('data/output.csv')
 
     cols = ['UserRole',
             'OrganizationType',
@@ -163,37 +165,36 @@ def create_user_df(df):
     for col in cols:
         df_users[col] = users[col].agg(lambda x: x.value_counts().index[0]).values
 
-    # change dtype of 'UserRole' and 'OrganizationType' to category
-    # df_users['UserRole'] = df_users['UserRole'].astype('category')
-    # df_users['OrganizationType'] = df_users['OrganizationType'].astype('category')
-    # df_users['MultiGenSearch'] = df_users['MultiGenSearch'].astype('category')
-    # df_users['MultiWindSearch'] = df_users['MultiWindSearch'].astype('category')
-    # df_users['MultiBatSearch'] = df_users['MultiBatSearch'].astype('category')
-    # df_users['MultiPvSearch'] = df_users['MultiPvSearch'].astype('category')
-    # df_users['MultiConSearch'] = df_users['MultiConSearch'].astype('category')
-    # df_users['DefaultGenerator'] = df_users['DefaultGenerator'].astype(bool)
-    # df_users['ImportedWind'] = df_users['ImportedWind'].astype(bool)
-    # df_users['ImportedSolar'] = df_users['ImportedSolar'].astype(bool)
-
     # remove outliers and reset index in 'NumSims' column
     # df_users = remove_outliers(df_users)
 
     return df_users
 
-def add_country_code(df):
+def add_country_codes(df):
+    # centers = pd.read_pickle('data/centers.pkl')
+
     latitude = df.Latitude.values
     longitude = df.Longitude.values
+
+    # dct = pd.Series(centers.SHORT_NAME.values, index=centers.ISO3136).to_dict()
 
     coordinates = []
     for lat, lng in zip(latitude, longitude):
         coordinates.append((lat, lng))
 
-    countries = []
+    codes = []
     results = rg.search(coordinates)
     for r in results:
-        countries.append(r['cc'])
+        try:
+            code = r['cc']
+            codes.append(code)
+        except:
+            names.append('NA')
+        # country = pycountry.countries.get(alpha_2=code)
+        # names.append(country.name)
 
-    df['Country'] = countries
+    df['Country'] = codes
+
     return df
 
 def remove_outliers(df_):
@@ -211,6 +212,27 @@ def remove_outliers(df_):
     clean_df = df.drop(df.index[outliers_rows.index.tolist()]).reset_index(drop=True)
 
     return clean_df
+
+def get_zip(df):
+    df = df[df['Country'] == 'US']
+    latitude = df.Latitude.values
+    longitude = df.Longitude.values
+
+    zip_codes = []
+    for lat, lng in zip(latitude, longitude):
+        try:
+            g = geocoder.google([lat, lng], method='reverse')
+            z_code = g.address.split(',')[-2][-5:]
+            zip_codes.append(z_code)
+        except:
+            zip_codes.append(0)
+
+    df['FIPS'] = zip_codes
+
+    df.reset_index(drop=True, inplace=True)
+    # df = remove_outliers(df)
+
+    return df
 
 def get_fips_codes(df):
     df = df[df['Country'] == 'US']
@@ -236,14 +258,14 @@ def get_fips_codes(df):
 
 if __name__ == '__main__':
     # ---Create dataframes---
-    df = read_data()
-    df = add_country_code(df)
-    df_users = create_user_df(df)
-    df_users = add_country_code(df_users)
+    # df = read_data()
+    # df = add_country_names(df)
+    # df_users = create_user_df(df)
+    # df_users = add_country_names(df_users)
 
     # ---Pickle dataframes---
-    df.to_pickle('data/df.pkl')
-    df_users.to_pickle('data/df_users.pkl')
+    # df.to_pickle('data/df.pkl')
+    # df_users.to_pickle('data/df_users.pkl')
 
     # ---Read back in pickled dataframes---
     # df = pd.read_pickle('data/df.pkl')
@@ -251,10 +273,12 @@ if __name__ == '__main__':
 
     # AFTER CLUSTERING
     # ---Read in clustered dataframes---
-    # df_clustered = pd.read_pickle('data/df_clustered.pkl')
+    df_clustered = pd.read_pickle('data/df_clustered.pkl')
+    df = add_country_codes(df_clustered)
     # df_users_clustered = pd.read_pickle('data/df_users_clustered.pkl')
 
     # ---Create USA dataframe with FIPS codes---
+    # df_usa = get_zip(df_clustered)
     # df_usa = get_fips_codes(df_clustered)
     # df_users_usa = get_fips_codes(df_users_clustered)
 

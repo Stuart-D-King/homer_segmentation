@@ -10,11 +10,11 @@ import folium
 import seaborn as sns
 app = Flask(__name__)
 
-df = pd.read_pickle('../data/df.pkl')
-df_clustered = pd.read_pickle('../data/df_clustered.pkl')
-df_users = pd.read_pickle('../data/df_users.pkl')
-df_users_clustered = pd.read_pickle('../data/df_users_clustered.pkl')
-C1, C2, C3, C4 = df_clustered[df_clustered['Cluster'] == 1], df_clustered[df_clustered['Cluster'] == 2], df_clustered[df_clustered['Cluster'] == 3], df_clustered[df_clustered['Cluster'] == 4]
+# df = pd.read_pickle('../data/df.pkl')
+df = pd.read_pickle('../data/df_clustered.pkl')
+# df_users = pd.read_pickle('../data/df_users.pkl')
+# df_users_clustered = pd.read_pickle('../data/df_users_clustered.pkl')
+C1, C2, C3, C4 = df[df['Cluster'] == 1], df[df['Cluster'] == 2], df[df['Cluster'] == 3], df[df['Cluster'] == 4]
 
 def user_counts(df):
     grps = df.UserRole.value_counts(dropna=False)
@@ -63,7 +63,7 @@ def search_space_counts(col):
     return df.to_html()
 
 def choropleth_map(cluster=0):
-    df = pd.read_pickle('../data/df_users_usa.pkl')
+    df = pd.read_pickle('../data/df_usa.pkl')
     if cluster != 0:
         df = df[df['Cluster'] == cluster]
 
@@ -95,10 +95,46 @@ def choropleth_map(cluster=0):
 
     m.save('static/img/choro_map.html')
 
+def marker_cluster_map(df, country, c_num):
+    centers = pd.read_pickle('../data/centers.pkl')
+
+    df = df[df['Country'] == country]
+    df = df[df['Cluster'] == c_num]
+
+    center_lat = centers.loc[centers['ISO3136'] == country, 'LAT'].tolist()[0]
+    center_lng = centers.loc[centers['ISO3136'] == country, 'LONG'].tolist()[0]
+
+    m = folium.Map(location=[center_lat, center_lng], zoom_start=6, control_scale=True)
+
+    # create a marker cluster
+    marker_cluster = folium.MarkerCluster('Simulations Cluster').add_to(m)
+
+    latitude = df.Latitude.values
+    longitude = df.Longitude.values
+    lat_lng = list(zip(latitude, longitude))
+
+    for idx, (lat, lng) in enumerate(lat_lng):
+        folium.Marker(location=[lat, lng], icon=folium.Icon(color='red')).add_to(marker_cluster)
+
+    m.save('static/img/marker_cluster.html')
+
+def usersims_by_cluster(df):
+    pt = pd.pivot_table(df, values=['Created'], index=['User'], columns=['Cluster'], aggfunc='count', fill_value=0)
+
+    cluster_df = pd.DataFrame(pt.iloc[:, 0].index)
+    cluster_df['Cluster 1'] = pt.iloc[:, 0].values
+    cluster_df['Cluster 2'] = pt.iloc[:, 1].values
+    cluster_df['Cluster 3'] = pt.iloc[:, 2].values
+    cluster_df['Cluster 4'] = pt.iloc[:, 3].values
+
+    output = round(cluster_df.describe(), 2)
+    return output.to_html()
+
+
 # home page
 @app.route('/', methods=['GET'])
 def index():
-    users_table = user_counts(df)
+    user_table = user_counts(df)
     org_table = org_counts(df)
 
     df_gen = search_space_counts('MultiGenSearch')
@@ -107,14 +143,26 @@ def index():
     df_pv = search_space_counts('MultiPvSearch')
     df_con = search_space_counts('MultiConSearch')
 
-    return render_template('index.html', user_table=user_table, org_table=org_table, df_gen=df_gen, df_wind=df_wind, df_bat=df_bat, df_pv=df_pv, df_con=df_con)
+    sims_by_cluster = usersims_by_cluster(df)
 
-# map page
-@app.route('/show_map', methods=['POST'])
-def show_map():
-    cluster = int(request.form['user_input'])
+    return render_template('index.html', user_table=user_table, org_table=org_table, df_gen=df_gen, df_wind=df_wind, df_bat=df_bat, df_pv=df_pv, df_con=df_con, sims_by_cluster=sims_by_cluster)
+
+# choro map page
+@app.route('/show_choro_map', methods=['POST'])
+def show_choro_map():
+    cluster = int(request.form['input_num_choro'])
     choropleth_map(cluster)
+
     return send_file('static/img/choro_map.html')
+
+# marker map page
+@app.route('/show_marker_map', methods=['POST'])
+def show_marker_map():
+    c_num = int(request.form['input_num_marker'])
+    country = str(request.form['input_country'])
+    marker_cluster_map(df, country, c_num)
+
+    return send_file('static/img/marker_cluster.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True, threaded=True)
