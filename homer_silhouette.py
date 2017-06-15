@@ -9,9 +9,11 @@ from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.mixture import GaussianMixture
 from homer_cluster import one_hot, prep_kmodes
 import pdb
+import boto3
+import os
 
 
-def plot_silhouette(df, X, n_clusters, model='AG', title='users'):
+def plot_silhouette(df, X, n_clusters, model='KM'):
     '''
     df: must be dense array or pandas dataframe
     '''
@@ -28,7 +30,7 @@ def plot_silhouette(df, X, n_clusters, model='AG', title='users'):
         labels = clusterer.labels_
 
     elif model == 'KM':
-        clusterer = kmodes.KModes(n_clusters=n_clusters, n_init=5, init='Huang', verbose=1)
+        clusterer = kmodes.KModes(n_clusters=n_clusters, n_init=3, init='Huang', verbose=1)
         labels = clusterer.fit_predict(df)
 
     elif model == 'GM':
@@ -71,7 +73,8 @@ def plot_silhouette(df, X, n_clusters, model='AG', title='users'):
 
     plt.title('Silhouette analysis for {} with {} clusters'.format(clusterer.__class__.__name__, n_clusters))
 
-    plt.savefig('img/silhouette/sil_{}_{}_{}.png'.format(clusterer.__class__.__name__, n_clusters, title), dpi=200)
+    plt.savefig('sil_{}_{}.png'.format(clusterer.__class__.__name__, n_clusters), dpi=200)
+
     plt.close()
 
 def get_silhouette_score(df, X, n_clusters, model='AG'):
@@ -96,7 +99,7 @@ def get_silhouette_score(df, X, n_clusters, model='AG'):
 
     return sil_avg
 
-def plot_sil_scores(df, X, model, title='users'):
+def plot_sil_scores(df, X, model):
     fig = plt.figure(figsize=(8,6))
     ax = fig.add_subplot(111)
 
@@ -106,23 +109,43 @@ def plot_sil_scores(df, X, model, title='users'):
     ax.set_ylabel('Silhouette Score')
     plt.title('Silhouette Score vs. Number of Clusters')
 
-    plt.savefig('img/silhouette/sil_v_clust_{}_{}.png'.format(model, title), dpi=200)
+    plt.savefig('sil_v_clust_{}.png'.format(model), dpi=200)
     plt.close()
+
+def to_bucket(f, bucket, write_name):
+    '''
+    Write files to s3 bucket.
+    INPUT: f - file to write
+           bucket - bucket to write to
+           write_name - name for S3
+    '''
+    # Specify the service
+    s3 = boto3.resource('s3')
+    data = open(f, 'rb')
+    s3.Bucket(bucket).put_object(Key=write_name, Body=data)
+    print('Success! {} added to {} bucket'.format(write_name, bucket))
 
 if __name__ == '__main__':
     plt.close('all')
-    df = pd.read_pickle('data/df.pkl')
-    df_users = pd.read_pickle('data/df_users.pkl')
+    df = pd.read_pickle('s3a://capstone-sking/df.pkl')
+    bucket = 'capstone-sking'
 
-    df_users_km = prep_kmodes(df_users)
+    # df = pd.read_pickle('data/df.pkl')
+    # df_users = pd.read_pickle('data/df_users.pkl')
+
+    # df_users_km = prep_kmodes(df_users)
     df_km = prep_kmodes(df)
 
-    X = one_hot(df)
-    X_users = one_hot(df_users)
 
-    # for i in range(3, 9):
-    #     plot_silhouette(df_users_km, X_users.todense(), n_clusters=i, model='KM')
+    X = one_hot(df)
+    # X_users = one_hot(df_users)
+
+    for i in range(2, 9):
+        plt = plot_silhouette(df_km, X.todense(), n_clusters=i, model='KM')
         # cluster_and_plot(X_users.toarray(), n_clusters=i, model='AG')
 
-    # plot_sil_scores(df_users_km, X_users.todense(), model='KM')
+    plot_sil_scores(df_km, X.todense(), model='KM')
     # plot_sil_scores(X_users.toarray(), model='AG')
+
+    # for plot in plots:
+    #     to_bucket(f=, bucket=bucket, write_name='sil_plot.csv')

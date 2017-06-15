@@ -157,24 +157,28 @@ if __name__ == '__main__':
     plt.close('all')
     # ---Read in data---
     df = pd.read_pickle('data/df.pkl')
-    df_users = pd.read_pickle('data/df_users.pkl')
+    # df_users = pd.read_pickle('data/df_users.pkl')
 
     # ---KModes---
-    df_users_km = prep_kmodes(df_users)
-    km_model, km_labels = run_kmodes(df_users_km)
+    # df_users_km = prep_kmodes(df_users)
+    # km_model, km_labels = run_kmodes(df_users_km)
+    df_km = prep_kmodes(df)
+    km_model, km_labels = run_kmodes(df_km)
 
     # ---Append lables to dataframe and pickle---
-    df_users['Cluster'] = km_labels
-    df_users['Cluster'] = df_users['Cluster'].apply(lambda x: x+1)
+    # df_users['Cluster'] = km_labels
+    # df_users['Cluster'] = df_users['Cluster'].apply(lambda x: x+1)
+    df['Cluster'] = km_labels
+    df['Cluster'] = df['Cluster'].apply(lambda x: x+1)
 
     # ---Map cluster labels to full dataframe---
-    keys = df_users['UserId'].tolist()
-    values = df_users['Cluster'].tolist()
-    user_cluster_dct = dict(zip(keys, values))
-    df['Cluster'] = df['User'].map(user_cluster_dct)
+    # keys = df_users['UserId'].tolist()
+    # values = df_users['Cluster'].tolist()
+    # user_cluster_dct = dict(zip(keys, values))
+    # df['Cluster'] = df['User'].map(user_cluster_dct)
 
     # ---Pickle clustered dataframes and KModes model---
-    df_users.to_pickle('data/df_users_clustered.pkl')
+    # df_users.to_pickle('data/df_users_clustered.pkl')
     df.to_pickle('data/df_clustered.pkl')
 
     with open('data/km_model.pkl', 'wb') as f:
@@ -182,7 +186,7 @@ if __name__ == '__main__':
 
     # ---Finally, read back in dataframes with cluster labels---
     df_clustered = pd.read_pickle('data/df_clustered.pkl')
-    df_users_clustered = pd.read_pickle('data/df_users_clustered.pkl')
+    # df_users_clustered = pd.read_pickle('data/df_users_clustered.pkl')
 
 
     # EXTRA STUFF
