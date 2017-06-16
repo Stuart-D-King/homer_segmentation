@@ -97,7 +97,7 @@
 
       <div class="carousel-inner" role="listbox">
         <div class="item active">
-          <img src="../static/img/turbines_2.jpg" alt=""/>
+          <img src="../static/img/turbines.jpg" alt=""/>
           <div class="container">
             <div class="carousel-caption">
               <h1>Microgrid Customer Segmentation</h1>
@@ -156,7 +156,7 @@
         <h3>Objective</h3>
         <p>HOMER Energy is a world leader in accurately modeling microgrid optimization. The HOMER (Hybrid Optimization of Multiple Energy Resources) software allows users to understand how to build cost effective and reliable microgrids that combine traditionally generated and renewable power, storage, and load management. HOMER Energy also offers software training, microgrid consulting expertise, and market access support to its vendor partners.</p>
 
-        <p>As the microgrid market continues to expand, HOMER and its vendor partners needs to better understand its software users' behavior and intensions. The objective of this study is to extract structure and meaning from HOMER Energy's collection of user software simulations. By being able to segment its customer base, HOMER can enhance the market access branch of its business model by providing its vendor partners with more reliable information related to the micrgrid consumer market. Understanding which software users more likely to initialize micogrids is information all vendors want to know to better target those customers ready to get started.</p>
+        <p>As the microgrid market continues to expand, HOMER and its vendor partners needs to better understand its software users' behavior and intensions. The objective of this study is to extract structure and meaning from HOMER Energy's collection of software simulations. By being able to segment its customer base, HOMER can enhance the market access branch of its business model by providing its vendor partners with more reliable information related to the micrgrid consumer market. Understanding which software users more likely to initialize micogrids is information all vendors want to know to better target those customers ready to get started.</p>
       </div>
 
       <div class="container">
@@ -246,7 +246,7 @@
           </tr>
           <tr>
             <td>Country</td>
-            <td>Country of the simulated project</td>
+            <td>ISO Alpha-2 country code of the simulated project</td>
             <td>Category</td>
           </tr>
         </table>
@@ -356,15 +356,21 @@
         <h2>Choropleth Map Creator</h2>
         <a href="#">Back to top</a>
         <h4>Make a choropleth map of the number of software simulations by county in the United States</h4>
-        <p>Which user cluster do you want to map? Enter '0' if you want to map all users.</p>
+        <p>Which cluster do you want to map? Select <b>"All"</b> from the drop down list if you want to map all clusters.</p>
         <form action='/show_choro_map' method='POST' id='submitform'>
-          <input type='text',  name='input_cluster'>
+          <select name="input_num_choro">
+            <option value="1">One</option>
+            <option value="2">Two</option>
+            <option value="3">Three</option>
+            <option value="4">Four</option>
+            <option value="0">All</option>
+          </select>
+          <br><br>
           <input type='submit' value="Show me my map!"/>
         </form>
       </div>
       <div class="container">
         <h2>Marker Cluster Map Creator</h2>
-        <a href="#">Back to top</a>
         <h4>Make a marker cluster map of the number of software simulations by country and cluster</h4>
         <form action='/show_marker_map' method='POST' id='submitform'>
           <p>Select a country:</p>
@@ -622,10 +628,10 @@
           <br><br>
           <p>Select a cluster:</p>
           <select name="input_num_marker">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
+            <option value="1">One</option>
+            <option value="2">Two</option>
+            <option value="3">Three</option>
+            <option value="4">Four</option>
           </select>
           <br><br>
           <input type="submit" value="Show me my map!"/>

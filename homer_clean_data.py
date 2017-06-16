@@ -8,7 +8,8 @@ import reverse_geocoder as rg
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 import geocoder
-import pycountry
+from uszipcode import ZipcodeSearchEngine
+import json
 
 def read_data():
     # df = pd.read_csv('data/combined_grid_and_run_data.csv', encoding='iso-8859-1')
@@ -171,12 +172,8 @@ def create_user_df(df):
     return df_users
 
 def add_country_codes(df):
-    # centers = pd.read_pickle('data/centers.pkl')
-
     latitude = df.Latitude.values
     longitude = df.Longitude.values
-
-    # dct = pd.Series(centers.SHORT_NAME.values, index=centers.ISO3136).to_dict()
 
     coordinates = []
     for lat, lng in zip(latitude, longitude):
@@ -189,9 +186,7 @@ def add_country_codes(df):
             code = r['cc']
             codes.append(code)
         except:
-            names.append('NA')
-        # country = pycountry.countries.get(alpha_2=code)
-        # names.append(country.name)
+            codes.append('NA')
 
     df['Country'] = codes
 
@@ -213,55 +208,41 @@ def remove_outliers(df_):
 
     return clean_df
 
-def get_zip(df):
+
+def fips_codes(df):
     df = df[df['Country'] == 'US']
     latitude = df.Latitude.values
     longitude = df.Longitude.values
 
-    zip_codes = []
-    for lat, lng in zip(latitude, longitude):
-        try:
-            g = geocoder.google([lat, lng], method='reverse')
-            z_code = g.address.split(',')[-2][-5:]
-            zip_codes.append(z_code)
-        except:
-            zip_codes.append(0)
-
-    df['FIPS'] = zip_codes
-
-    df.reset_index(drop=True, inplace=True)
-    # df = remove_outliers(df)
-
-    return df
-
-def get_fips_codes(df):
-    df = df[df['Country'] == 'US']
-    latitude = df.Latitude.values
-    longitude = df.Longitude.values
-
+    coordinates = [(lat, lng) for lat, lng in zip(latitude, longitude)]
+    print(len(coordinates))
+    unique = list(set(coordinates))
+    print(len(unique))
     fips_codes = []
-    for lat, lng in zip(latitude, longitude):
+    for lat, lng in unique:
         try:
             url = 'http://data.fcc.gov/api/block/find?latitude={}&longitude={}&showall=true'.format(lat, lng)
             content = requests.get(url).content
             root = ET.fromstring(content)
             fips_codes.append(root[1].attrib['FIPS'])
+            print(root[1].attrib['FIPS'])
         except:
             fips_codes.append(0)
 
-    df['FIPS'] = fips_codes
+    dct = dict(zip(unique, fips_codes))
 
-    df.reset_index(drop=True, inplace=True)
-    # df = remove_outliers(df)
+    df['lat_lng'] = list(zip(latitude, longitude))
+    df['FIPS'] = df['lat_lng'].apply(lambda x: dct[x])
+    df.drop('lat_lng', axis=1, inplace=True)
 
     return df
 
 if __name__ == '__main__':
     # ---Create dataframes---
     # df = read_data()
-    # df = add_country_names(df)
+    # df = add_country_codes(df)
     # df_users = create_user_df(df)
-    # df_users = add_country_names(df_users)
+    # df_users = add_country_codes(df_users)
 
     # ---Pickle dataframes---
     # df.to_pickle('data/df.pkl')
@@ -273,14 +254,13 @@ if __name__ == '__main__':
 
     # AFTER CLUSTERING
     # ---Read in clustered dataframes---
-    df_clustered = pd.read_pickle('data/df_clustered.pkl')
-    df = add_country_codes(df_clustered)
+    # df_clustered = pd.read_pickle('data/df_clustered.pkl')
     # df_users_clustered = pd.read_pickle('data/df_users_clustered.pkl')
 
+
     # ---Create USA dataframe with FIPS codes---
-    # df_usa = get_zip(df_clustered)
-    # df_usa = get_fips_codes(df_clustered)
-    # df_users_usa = get_fips_codes(df_users_clustered)
+    # df_usa = fips_codes(df_clustered)
+    # df_users_usa = fips_codes(df_users_clustered)
 
     # ---Pickle USA dataframes---
     # df_usa.to_pickle('data/df_usa.pkl')

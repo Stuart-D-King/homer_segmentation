@@ -163,7 +163,7 @@ def cluster_bars(df):
 
     plt.xticks(rotation='horizontal')
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
-          fancybox=True, shadow=True, ncol=4)
+          fancybox=True, shadow=True, ncol=6)
     # ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     # plt.legend(loc='best')
     # plt.tight_layout()
@@ -204,15 +204,16 @@ def choropleth_map(df, title=None):
     df['GEO_ID'] = df['FIPS'].apply(set_id_)
     df = df.dropna()
 
-    state_geo = r'data/us-states.json'
-    county_geo = r'data/us_counties_20m_topo.json'
-    # data = df['NumSims'].values
-    # 'data/US_Unemployment_Oct2012.csv'
+    simsdata = pd.DataFrame(df['GEO_ID'].value_counts().astype(float))
+    simsdata = simsdata.reset_index()
+    simsdata.columns = ['ID', 'Number']
 
-    m = folium.Map(location=[48, -99], zoom_start=8)
+    county_geo = r'data/us_counties_20m_topo.json'
+
+    m = folium.Map(location=[48, -99], zoom_start=4)
     m.choropleth(geo_path=county_geo,
-                    data=df,
-                    columns=['GEO_ID', 'NumSims'],
+                    data=simsdata,
+                    columns=['ID', 'Number'],
                     key_on='feature.id',
                     fill_color='PuRd',
                     fill_opacity=0.7,
@@ -243,22 +244,15 @@ def marker_cluster_map(df_, country, c_num):
     longitude = df.Longitude.values
     lat_lng = list(zip(latitude, longitude))
 
-    # colors = {1:'red', 2:'blue', 3:'green', 4:'yellow'}
-    # df['Color'] = df['Cluster'].apply(lambda x: colors[x])
-    # colors = [cm.spectral(float(i) / 4) for i in range(4)]
-
     for idx, (lat, lng) in enumerate(lat_lng):
-        folium.Marker(location=[lat, lng], icon=folium.Icon(color='red')).add_to(marker_cluster)
-        # folium.Marker(location=[lat, lng], icon=folium.Icon(color=df['Color'][idx])).add_to(marker_cluster)
+        folium.Marker(location=[lat, lng]).add_to(marker_cluster)
 
     m.save('img/maps/marker_cluster.html')
 
 
 if __name__ == '__main__':
     plt.close('all')
-    # df_users = pd.read_pickle('data/df_users_clustered.pkl')
     df = pd.read_pickle('data/df_clustered.pkl')
-    # df_users_usa = pd.read_pickle('data/df_users_usa.pkl')
     # df_usa = pd.read_pickle('data/df_usa.pkl')
 
     # create_map(df_users, title='first_map')
@@ -282,7 +276,6 @@ if __name__ == '__main__':
     # c4 = df[df['Cluster'] == 4]
     # time_hist(c4)
 
-    # df_cleaned = remove_outliers(df_users_usa)
-    # choropleth_map(df_cleaned)
+    # choropleth_map(df_usa)
+    # marker_cluster_map(df, 'DE', 2)
     # cluster_bars(df)
-    marker_cluster_map(df, 'DE', 2)

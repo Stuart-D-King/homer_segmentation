@@ -1,19 +1,10 @@
 from flask import Flask, request, render_template, send_file
 import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
-import matplotlib.cm as cm
-import plotly
-from plotly.graph_objs import *
-from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
 import folium
-import seaborn as sns
 app = Flask(__name__)
 
-# df = pd.read_pickle('../data/df.pkl')
 df = pd.read_pickle('../data/df_clustered.pkl')
-# df_users = pd.read_pickle('../data/df_users.pkl')
-# df_users_clustered = pd.read_pickle('../data/df_users_clustered.pkl')
+
 C1, C2, C3, C4 = df[df['Cluster'] == 1], df[df['Cluster'] == 2], df[df['Cluster'] == 3], df[df['Cluster'] == 4]
 
 def user_counts(df):
@@ -80,12 +71,16 @@ def choropleth_map(cluster=0):
     df['GEO_ID'] = df['FIPS'].apply(set_id_)
     df = df.dropna()
 
+    simsdata = pd.DataFrame(df['GEO_ID'].value_counts().astype(float))
+    simsdata = simsdata.reset_index()
+    simsdata.columns = ['ID', 'Number']
+
     county_geo = r'../data/us_counties_20m_topo.json'
 
     m = folium.Map(location=[48, -99], zoom_start=4)
     m.choropleth(geo_path=county_geo,
-                    data=df,
-                    columns=['GEO_ID', 'NumSims'],
+                    data=simsdata,
+                    columns=['ID', 'Number'],
                     key_on='feature.id',
                     fill_color='PuRd',
                     fill_opacity=0.7,
@@ -104,7 +99,7 @@ def marker_cluster_map(df, country, c_num):
     center_lat = centers.loc[centers['ISO3136'] == country, 'LAT'].tolist()[0]
     center_lng = centers.loc[centers['ISO3136'] == country, 'LONG'].tolist()[0]
 
-    m = folium.Map(location=[center_lat, center_lng], zoom_start=6, control_scale=True)
+    m = folium.Map(location=[center_lat, center_lng], zoom_start=5.5, control_scale=True)
 
     # create a marker cluster
     marker_cluster = folium.MarkerCluster('Simulations Cluster').add_to(m)
@@ -114,7 +109,7 @@ def marker_cluster_map(df, country, c_num):
     lat_lng = list(zip(latitude, longitude))
 
     for idx, (lat, lng) in enumerate(lat_lng):
-        folium.Marker(location=[lat, lng], icon=folium.Icon(color='red')).add_to(marker_cluster)
+        folium.Marker(location=[lat, lng]).add_to(marker_cluster)
 
     m.save('static/img/marker_cluster.html')
 
@@ -129,7 +124,6 @@ def usersims_by_cluster(df):
 
     output = round(cluster_df.describe(), 2)
     return output.to_html()
-
 
 # home page
 @app.route('/', methods=['GET'])
