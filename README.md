@@ -6,7 +6,7 @@ As the microgrid market continues to expand, HOMER and its vendor partners needs
 
 ### Process
 #### Data Preprocessing
-The first and very important step in my process was to understand the data and prepare it for modeling. The HOMER software is extremely powerful and capable of modeling hundreds of microgird configurations at once. Because the software has predictive capabilities built into it, my task was to understand which features in the data space would be insightful for determining the realness or seriousness of a project. Initial features were selected based on consultations with my HOMER counterpart, Jordan Esbin, as well as my participation in HOMER's online software training series. After selecting the appropriate user input features, I performed a variety of data munging and cleaning steps using the Pandas data analysis library. For example, I bucketed the User Role and Organization Type variables into categories such as academic, business, technical, and undefined, and categorized whether or not a simulation modeled certain types of energy hardware. This extensive data cleaning step reduced the features space from 144 variables to 15. Final model features include:
+The first and very important step in this process was to understand the data and prepare it for modeling. The HOMER software is extremely powerful and capable of modeling hundreds of microgird configurations at once. Because the software has predictive capabilities built into it, my task was to understand which features in the data space would be insightful for determining the realness or seriousness of a project. Initial features were selected based on consultations with my HOMER counterpart, Jordan Esbin, as well as my participation in HOMER's online software training series. After selecting the appropriate user input features, I performed a variety of data munging and cleaning steps using the Pandas data analysis library. For example, I bucketed the User Role and Organization Type variables into categories such as academic, business, technical, and undefined, and categorized whether or not a simulation modeled certain types of energy hardware. This extensive data cleaning step reduced the features space from 144 variables to 17. Final model features include:
 
 | Feature   | Description | Data Type |
 | -------   | ----------- | --------- |
@@ -20,11 +20,12 @@ The first and very important step in my process was to understand the data and p
 | MultiBatSearch | If applicable, if the user simulated a variety of battery quantities | Category |
 | MultiPvSearch | If applicable, if the user simulated a variety of solar panel configurations | Category |
 | MultiConSearch | If applicable, if the user simulated a variety of converter configurations | Category |
-| Sample | Whether a sample file was used in the simulation | Boolean |
 | DefaultGenerator | If applicable, if the user used the default generator model in the simulation | Category |
+| Sample | Whether a sample file was used in the simulation | Boolean |
 | ImportedWind | If the user opted to import wind data in lieu of using the default parameters | Boolean |
 | ImportedSolar | If the user opted to import solar data in lieu of using the default parameters | Boolean |
 | Country | Country of the simulated project | Category |
+| FIPS | Federal Information Processing Standards (FIPS) code for U.S.-based simulations | String |
 
 ### Model Development
 Because HOMER does not currently have a way of tracking which of its software users have become microgrid implementers, I explored various unsupervised clustering algorithms to model the underlying structure of the data. KMeans is a common clustering algorithm that groups data according to existing similarities. However, because the similarity metric used in KMeans is the computed euclidean distance between each data point and the centroids of each cluster, the KMeans algorithm is not appropriate for non-numerical data. A more appropriate clustering algorithm is **KModes**. KModes is an extension of KMeans, however, instead of calculating distance, it quantifies the total number of mismatched categories between two objects: the small the number, the more similar the two objects. In addition, KModes uses modes instead of means, in which the mode is a vector of elements that minimizes the dissimilarities between the vector and an individual data point.

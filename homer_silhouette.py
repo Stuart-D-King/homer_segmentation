@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from sklearn.metrics import silhouette_samples, silhouette_score
-from sklearn.metrics.pairwise import pairwise_distances
 from kmodes import kmodes, kprototypes
 from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.mixture import GaussianMixture
@@ -127,15 +126,12 @@ def to_bucket(f, bucket, write_name):
 
 if __name__ == '__main__':
     plt.close('all')
-    df = pd.read_pickle('s3a://capstone-sking/df.pkl')
-    bucket = 'capstone-sking'
 
-    # df = pd.read_pickle('data/df.pkl')
+    df = pd.read_pickle('data/df.pkl')
     # df_users = pd.read_pickle('data/df_users.pkl')
 
     # df_users_km = prep_kmodes(df_users)
     df_km = prep_kmodes(df)
-
 
     X = one_hot(df)
     # X_users = one_hot(df_users)
@@ -146,6 +142,3 @@ if __name__ == '__main__':
 
     plot_sil_scores(df_km, X.todense(), model='KM')
     # plot_sil_scores(X_users.toarray(), model='AG')
-
-    # for plot in plots:
-    #     to_bucket(f=, bucket=bucket, write_name='sil_plot.csv')

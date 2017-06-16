@@ -26,6 +26,7 @@
     <!-- Custom styles for this template -->
     <link href="../static/css/carousel.css" rel="stylesheet">
 
+
     <style>
     table {
     font-family: arial, sans-serif;
@@ -80,6 +81,7 @@
                 <li><a href="#overview">Overview</a></li>
                 <li><a href="#results">Results</a></li>
                 <li><a href="#mapcreator">Map Creator</a></li>
+                <li><a href="#nextsteps">Next Steps</a></li>
                 <li><a href="#contact">Contact</a></li>
                 <li><a href="http://www.homerenergy.com/" target="_blank">HOMER Energy</a></li>
                 <li><a href="https://www.galvanize.com/denver-golden-triangle/data-science" target="_blank">Galvanize</a></li>
@@ -125,7 +127,7 @@
           <i class="fa fa-compass" style="font-size:80px" aria-hidden="true"></i>
           </a>
           <h2>Project Overview</h2>
-          <p>Understand the genesis of this project, what it hoped to accomplish, and where we go from here.</p>
+          <p>Understand the genesis of this project and how the model was developed.</p>
           <!-- <p><a class="btn btn-default" href="#overview" role="button">View details &raquo;</a></p> -->
         </div><!-- /.col-lg-4 -->
         <div class="col-lg-4">
@@ -133,7 +135,7 @@
           <i class="fa fa-line-chart" style="font-size:80px" aria-hidden="true"></i>
           </a>
           <h2>Results!</h2>
-          <p>Read the customer profiles developed as a result of the project's results and see other visualizations created.</p>
+          <p>Review the customer profiles developed as a result of the project's results and see other visualizations created.</p>
           <!-- <p><a class="btn btn-default" href="#results" role="button">View details &raquo;</a></p> -->
         </div><!-- /.col-lg-4 -->
         <div class="col-lg-4">
@@ -162,7 +164,7 @@
       <div class="container">
         <h3>Process</h3>
         <h4>Data Preprocessing</h4>
-        <p>The first and very important step in my process was to understand the data and prepare it for modeling. The HOMER software is extremely powerful and capable of modeling hundreds of microgird configurations at once. Because the software has predictive capabilities built into it, my task was to understand which features in the data space would be insightful for determining the realness or seriousness of a user. Initial features were selected based on consultations with my HOMER counterpart, Jordan Esbin, as well as my participation in HOMER's oneline software training series. After selecting the appropriate user input features, I performed a variety of data munging and cleaning steps using the Pandas data analysis library. For example, I bucketed the User Role and Organization Type variables into categories such as academic, business, technical, and undefined, and categorized whether or not a user modeled certain types of energy hardware. This extensive data cleaning step reduced the features space from 144 variables to 15. Final model features include:</p>
+        <p>The first and very important step in this process was to understand the data and prepare it for modeling. The HOMER software is extremely powerful and capable of modeling hundreds of microgird configurations at once. Because the software has predictive capabilities built into it, my task was to understand which features in the data space would be insightful for determining the realness or seriousness of a project. Initial features were selected based on consultations with my HOMER counterpart, Jordan Esbin, as well as my participation in HOMER's online software training series. After selecting the appropriate user input features, I performed a variety of data munging and cleaning steps using the Pandas data analysis library. For example, I bucketed the User Role and Organization Type variables into categories such as academic, business, technical, and undefined, and categorized whether or not a simulation modeled certain types of energy hardware. This extensive data cleaning step reduced the features space from 144 variables to 17. Final model features include:</p>
         <table>
           <tr>
             <th>Feature</th>
@@ -170,14 +172,9 @@
             <th>Data Type</th>
           </tr>
           <tr>
-            <td>UserID</td>
+            <td>User</td>
             <td>Six-digit numeric ID for each user</td>
             <td>String</td>
-          </tr>
-          <tr>
-            <td>NumSims</td>
-            <td>Number of simulations for each users from April 2014 to April 2017</td>
-            <td>Integer</td>
           </tr>
           <tr>
             <td>UserRole</td>
@@ -225,14 +222,14 @@
             <td>Category</td>
           </tr>
           <tr>
-            <td>Sample</td>
-            <td>Whether a sample file was used in the simulation</td>
-            <td>Boolean</td>
-          </tr>
-          <tr>
             <td>DefaultGenerator</td>
             <td>If applicable, if the user used the defaualt generator model in the simulation</td>
             <td>Category</td>
+          </tr>
+          <tr>
+            <td>Sample</td>
+            <td>Whether a sample file was used in the simulation</td>
+            <td>Boolean</td>
           </tr>
           <tr>
             <td>ImportedWind</td>
@@ -249,26 +246,30 @@
             <td>ISO Alpha-2 country code of the simulated project</td>
             <td>Category</td>
           </tr>
+          <tr>
+            <td>FIPS</td>
+            <td>Federal Information Processing Standards (FIPS) code for U.S.-based simulations</td>
+            <td>String</td>
+          </tr>
         </table>
       </div>
 
       <div class="container">
         <h4>Model Development</h4>
-        <p>Because HOMER does not currently have a way of tracking which of its software users have become microgrid implementers, I explored various unsuperivsed clustering algorithms to model the underlying structure of the data. KMeans is a common clustering algorithm that groups data according to existing similarities. However, because the similarity metric used in KMeans is the computed euclidean distance between each data point and the centroids of each cluster, the KMeans algorthim is not appropriate for non-numerical data. A more appropriate clustering algorithm is KModes. KModes is an extension of KMeans, however, instead of calculating distance, it quantifies the total number of mismatched categoreis between two objects: the small ther number, the more similar the two objects. In addition, KModes uses modes instead of means, in which the mode is a vector of elements that minimizes the dissimilarities between the vector and an individual data point.</p>
-        <p>Other unsupervised clustering algorithms were also tested on the data, including hierarchical agglomerative clustering and gaussian mixture models. To test these algorithms, I used one-hot encoding to further transform the feature space into binary/dummy variables. Both algorithms produced clustered results, however, the interpretability of the clusters was compromised due to the inherent non-numerical nature of the data. For this reason, I settled on KModes as the algorithm to formulate my findings. You can read more about KModes clustering in Zhexue Huang's <a href="http://arbor.ee.ntu.edu.tw/~chyun/dmpaper/huanet98.pdf">research paper</a> on the topic.</p>
+        <p>Because HOMER does not currently have a way of tracking which of its software users have become microgrid implementers, I explored various unsupervised clustering algorithms to model the underlying structure of the data. KMeans is a common clustering algorithm that groups data according to existing similarities. However, because the similarity metric used in KMeans is the computed euclidean distance between each data point and the centroids of each cluster, the KMeans algorithm is not appropriate for non-numerical data. A more appropriate clustering algorithm is KModes. KModes is an extension of KMeans, however, instead of calculating distance, it quantifies the total number of mismatched categories between two objects: the small the number, the more similar the two objects. In addition, KModes uses modes instead of means, in which the mode is a vector of elements that minimizes the dissimilarities between the vector and an individual data point.</p>
+        <p>Other unsupervised clustering algorithms were also tested on the data, including hierarchical agglomerative clustering and gaussian mixture models. To test these algorithms, I used one-hot encoding to further transform the feature space into binary/dummy variables. Both algorithms produced clustered results, however, the interpretability of the clusters was compromised due to the inherent non-numerical nature of the data. For this reason, I settled on KModes as the algorithm to formulate my findings. For a deep dive into kmodes clustering, check out Zhexue Huang's excellent <a href="http://arbor.ee.ntu.edu.tw/~chyun/dmpaper/huanet98.pdf">research paper</a> on the topic.</p>
       </div>
 
       <div class="container">
-        <p>Once the cluster algorithm was selected, I needed to determine the appropriate amount of clusters to segment the data. In KMeans clustering, it is common to perform a dimensionality reduction technique such as principle component analysis (PCA) to plot the resulting clusters in a two dimensional space to visually confirm clustering is taking place. However, because applying PCA to categorical data is generally regarded as unwise, I instead opted to calcuate a silhouette score based on a hamming distance metric for a range of cluster quantities to settle on the most appropriate number of customer segments. When calcuating the silhouette coefficient, the best possible value is 1, indicating all data points are perfected groupped and there are no overlapping clusters. A coefficient of 0 implies overlapping clusters, and negative values suggest that a sample has been assigned to the wrong cluster. Based on the below graphics, I decided to cluster my data into four clusters. I selected k=4 because the silhouette score was only slightly lower than k=3, and based on my conversations with HOMER four customer segments fit aligned closely with expected user types. Furthermore, while the silhouette score for k=7 was also similar, I ultimately decided an analysis of seven customer segments would be more appropriate for future analysis.
+        <p>Once the cluster algorithm was selected, I needed to determine the appropriate amount of clusters to segment the data. In KMeans clustering, it is common to perform a dimensionality reduction technique such as principle component analysis (PCA) to plot the resulting clusters in a two dimensional space to visually confirm clustering is taking place. However, because applying PCA to categorical data is generally regarded as unwise, I instead opted to calcuate a silhouette score for different numbers of clusters based on a hamming distance metric to settle on the most appropriate number of customer segments. When calcuating the silhouette coefficient, the best possible value is 1, indicating all data points are perfected groupped and there are no overlapping clusters. A coefficient of 0 implies overlapping clusters, and negative values suggest that a sample has been assigned to the wrong cluster. Based on the below plot of scores, I decided to cluster my data into four clusters. I selected k=4 because the silhouette score was the highest for this number of clusteres, and it made intuitive sense based on my understanding of HOMER's customer base.</p>
       </div>
 
       <div class="container">
         <img src="../static/img/sil_v_clust_KM.png" style="float: left; width: 49%; margin-right: 1%; margin-bottom: 0.5em;">
-        <!-- <img src="../static/img/sil_KModes_4_users.png" style="float: left; width: 49%; margin-right: 1%; margin-bottom: 0.5em;"> -->
       </div>
 
       <div class="container">
-        <p>After selecting the appropriate number of clusters I fitted the KModes clustering algorithm to my data and assigned cluster labels to each user. The cluster labels were then mapped back to the full dataset of all simulations using the user's ID as the pairing key. I then performed my initial exploratory data analysis to begin extracting meaningful business intelligence from the clusters.</p>
+        <p>After selecting the appropriate number of clusters I fitted the KModes clustering algorithm to my data and assigned cluster labels to each simulation. I then performed my initial exploratory data analysis to begin extracting meaningful business intelligence from the clusters.</p>
       </div>
     </section>
 
@@ -280,55 +281,55 @@
         <a href="#">Back to top</a>
         <h4>Exploratory Data Analysis</h4>
         <div>
-          <p>Before examining each user cluster, I took a look at the full simulations dataframe to gather baseline statistics. The breakdown of users by user type is shown below.</p>
+          <p>Before examining each cluster, I gathered a baseline understanding of the user make-up of the simulations. The breakdown of simulations by user type is shown below.</p>
           <p>{{user_table|safe}}</p>
-          <p>And by organization type:</p>
+          <p>I did the same for organization type:</p>
           <p>{{org_table|safe}}</p>
-          <p>As is evident from the above tables, the greatest majority of users work in the academic field or for an academic institution. On the whole, HOMER does not consider academic users to be likely to become real microgrid implementers.</p>
+          <p>As is evident from the tables above, the majority of simulations are run by academic professionals or by an academic institution. On the whole, HOMER does not consider academic users to be as likely to become real microgrid implementers as other user types.</p>
         </div>
 
         <div>
-          After assigning cluster labels to each user using KModes, we can see that the total number of simulations is fairly well distributed among the four clusters.</p>
+          After assigning cluster labels to each user using KModes, we can see that the total number of simulations is fairly well distributed among the four clusters, with a larger share going to Cluster 1 and a smaller share to Cluster 2.</p>
           <div class="container">
             <img src="../static/img/cluster_counts.png" style="float: left; width: 50%; margin-right: 0%; margin-bottom: 0.5em;">
           </div>
         </div>
 
           <div>
-            <p>Looking at the distribution of user types in each cluster, we can see that the KModes has clustered the vast majority of technical users in cluster #4, with academic users being almost equally distributed among clusters 1-3.</p>
+            <p>Looking at the distribution of user types in each cluster, we can see that model has split the user types into particular clusters, but not not exclusively into just one cluster. Academic users are the majority it in Clusters 1 and 4, and technical users dominate Clusters 2 and 3.</p>
             <div class="container">
               <img src="../static/img/sims_by_cluster_user.png" style="float: left; width: 70%; margin-right: 0%; margin-bottom: 0.5em;">
             </div>
           </div>
 
           <div>
-            <p>Similarly, the majority of simulations run by members/employees of engineering organizations have found their way into cluster #4.</p>
+            <p>Similarly, the distribution of organization type amoung the clusters aligns closely with the user type distributions. Academic institutions are the majority in Clusters 1 and 4, and enginneering firms are most common in Clusters 2 and 3.</p>
             <div class="container">
               <img src="../static/img/sims_by_cluster_org.png" style="float: left; width: 70%; margin-right: 0%; margin-bottom: 0.5em;">
             </div>
           </div>
 
           <div>
-            <p>Because the data had also been grouped by user using each user's most common inputs as feature values, I reviewed the distribution of the number of simulations by user. A basic histogram of simulations by user demonstrates the high frequency of ten or less simulations by user, however, some users are running many more simulations, which are likely more serioius users who are modeling many microgrid configurations.
+            <p>To explore and extract additional information from the data, I also created weekday and weekend histograms of the number of simulations per day for each cluster. The resultant graphs suggest similar, but subtle differences between the four groups. While the number of simulations per day is on average highest during the week for all four clusters, we can see from the histograms for Cluster 1 the frequency of simulations on the weekend does not differ as severely as compared to the other three groups. This could be due to the fact that there is large majority of academic users in this cluster, and students are more likely to run simulations over the weekend for academic projects. Buildiing on this analysis, Cluster 4, which also has a majority of academic users and organizations, appears to have relatively high kurtosis due to a few extreme deviations (outliers). While the weekend simulations seem to be infrequent in Cluster 4, there are a handful of days in which the cumulative sum of simulations have reached into the thousands. The true nature of these simulations likely require further analysis to determine if the simulations are being run with project implementation in mind, or as part of academic research endeavor. Clusters 2 and 3 also suggest minimal weekend software usage, with Cluster 3 depicting a distribution suggestive of more model runs per day.
             <div class="container">
               <img src="../static/img/weekday_weekend.png" style="float: left; width: 60%; margin-right: 0%; margin-bottom: 0.5em;">
             </div>
           </div>
 
           <div>
-            <p>Diving deeeper into the number of simulations by user, the table below provides some insight into the freqency and variability at which users are interacting with the software.</p>
+            <p>Diving deeeper into the number of simulations by cluster, the table below provides some insight into the freqency and variability at which users are interacting with the software in each cluster. Users in Cluster 1 have the highest average number of simulations, with Clusters 3 and 4 not far behind. Cluster 1 also has the greatest standard deviation, suggesting users in this cluster have the greatest variability in their interaction with the software. Users in Cluster 2 have the lowest average number of simulations, as well as the smallest standard deviation. It may be appropriate to classify these (on average) techincal users as exploring the software's functionality, but not relying on it to extract actionable insights.</p>
             <p>{{sims_by_cluster|safe}}</p>
           </div>
 
           <div>
-            <p>Other important input variables identified by HOMER are whether a user has imported her own wind or solar location metrics, and whether a user opts to use HOMER's default sample file. The act of importing more precise weather data is viewed favorably in regards to the user's seriousness of turning a simulation into a real project. Similarly, HOMER does not consider a simulation run using its deflaut sample file to correlate with project realness.</p>
-            <p>The below bar graphs show the mean feature usage for imported solar, imported wind, and sample file usage in each cluster. For imported wind, we see that cluster #2 simulations are the most likely to import this data, with 10 percent of simulations importing solar data. For imported solar, cluster #4 has the highest average (10 percent) for using that particular feature. Regarding the usage of the default sample file, cluster #2 uses HOMER's sample file more often than the other clusters, although it should be noted the relative usage is still low at just over 1.6 percent.
+            <p>Other important input variables identified by HOMER are whether a user has imported her own wind or solar location metrics, and whether a user opts to use HOMER's default sample file. The act of importing more precise weather data is viewed favorably in regards to the user's seriousness of turning a simulation into a real project. Similarly, HOMER does not consider a simulation run using its default sample file to correlate with project realness.</p>
+            <p>The below bar graphs show the mean feature usage for imported solar, imported wind, and sample file in each cluster. For imported wind, we see that Cluster 2 simulations are the most likely to import this data, with just over 10 percent of simulations using imported wind data. For imported solar, all four clusters have a similar mean average for importing geographic-specific data. Interestingly enough, Clusters 2 and 3, the groups with the greatest proportion of techincal users, have the highest average for using HOMER's sample file to run simulations. While HOMER considers the use of the sample file to be a negative indicator of simulation realness, it should be noted the relative usage in these clusters is still low at 1.25 and 1.75 percent of the time, respectfully.
             <div class="container">
               <img src="../static/img/imports.png" style="float: left; width: 75%; margin-right: 0%; margin-bottom: 0.5em;">
             </div>
 
           <div>
-            <p>HOMER also considers the extent to which a user interacts with its software as a strong indicator of the user's/simulation's realness. For each simulation, a user is able to specify what energy hardware (e.g. batteries, turbines, solar panels, etc.) she would like to model, as well a range of hardward specifications for the software to compare and output an optimized microgrid (optimization is defined by the the lowest net present cost of microgrid system). Per conversations with HOMER, a rough metric to judge a user's interaction is whether the user provides more than two different hardware specifications to test. For this reason, I crafted a series of features that checks whether a user modeled a certain piece of hardware, and if so, if the simulations was run with multiple hardware specifications for that particular hardware category.</p>
+            <p>HOMER also considers the extent to which a simulation models a variety of microgrid parameters and configurations as a strong indicator of the simulation's realness. For each simulation, a user is able to specify what energy hardware (e.g. batteries, turbines, solar panels, etc.) she would like to model, as well a range of hardward specifications for the software to compare and output an optimized microgrid (optimization is defined by the the lowest net present cost of microgrid system). Per conversations with HOMER, a rough metric to judge a simulaiton's realness is whether the user provides more than two different hardware specifications to test. For this reason, I crafted a series of features that checks whether a user modeled a certain piece of hardware, and if so, if the simulations was run with multiple hardware specifications for that particular hardware category.</p>
             <p>For generators, the breakdown of simulations that modeled generators, and if more than two generator sizes were tested is as follows.</p>
             <p><b>Key:</b></p>
             <p>True = generator modeled and more than two sizes tested</p>
@@ -345,7 +346,45 @@
             <p>{{df_con|safe}}</p>
 
         <h3>Cluster Profiles</h3>
-        <h4>Cluster #1</h4>
+        <h4>Cluster 1 - Students and weekend warriors</h4>
+        <!-- Graduation Cap icon by Icons8 -->
+        <img src="https://png.icons8.com/graduation-cap/color/96" title="Graduation Cap" width="96" height="96">
+        <!-- Library icon by Icons8 -->
+        <img src="https://png.icons8.com/library/color/96" title="Library" width="96" height="96">
+        <!-- Sunday icon by Icons8 -->
+        <img src="https://png.icons8.com/sunday/color/96" title="Sunday" width="96" height="96">
+
+        <h4>Cluster 2 - Technical professionals not interacting too much, but possibly interested in wind power</h4>
+        <!-- Engineer icon by Icons8 -->
+        <img src="https://png.icons8.com/engineer/color/96" title="Engineer" width="96" height="96">
+        <!-- Factory icon by Icons8 -->
+        <img src="https://png.icons8.com/factory/color/96" title="Factory" width="96" height="96">
+        <!-- Windy Weather icon by Icons8 -->
+        <img src="https://png.icons8.com/windy-weather/color/96" title="Windy Weather" width="96" height="96">
+
+        <h4>Cluster 3 - The sweet spot...technical professionals looking for the right microgrid</h4>
+        <!-- Engineer icon by Icons8 -->
+        <img src="https://png.icons8.com/engineer/color/96" title="Engineer" width="96" height="96">
+        <!-- Factory icon by Icons8 -->
+        <img src="https://png.icons8.com/factory/color/96" title="Factory" width="96" height="96">
+        <!-- Engine icon by Icons8 -->
+        <img src="https://png.icons8.com/engine/color/96" title="Engine" width="96" height="96">
+        <!-- Car Battery icon by Icons8 -->
+        <img src="https://png.icons8.com/car-battery/color/96" title="Car Battery" width="96" height="96">
+        <!-- Sun icon by Icons8 -->
+        <img src="https://png.icons8.com/sun/color/96" title="Sun" width="96" height="96">
+        <!-- Electricity icon by Icons8 -->
+        <img src="https://png.icons8.com/electricity/color/96" title="Electricity" width="96" height="96">
+
+        <h4>Cluster 4 - Academic professionals and other professionals looking to supplement energy reserves</h4>
+        <!-- Graduation Cap icon by Icons8 -->
+        <img src="https://png.icons8.com/graduation-cap/color/96" title="Graduation Cap" width="96" height="96">
+        <!-- Library icon by Icons8 -->
+        <img src="https://png.icons8.com/library/color/96" title="Library" width="96" height="96">
+        <!-- Recycling symbol icon by Icons8 -->
+        <img src="https://png.icons8.com/recycling-symbol/color/96" title="Recycling symbol" width="96" height="96">
+
+
       </div>
     </section>
 
@@ -353,16 +392,16 @@
 
     <section id="mapcreator">
       <div class="container">
-        <h2>Choropleth Map Creator</h2>
+        <h2>U.S. County Heatmap Creator</h2>
         <a href="#">Back to top</a>
-        <h4>Make a choropleth map of the number of software simulations by county in the United States</h4>
+        <h4>Make a choropleth map of the number of software simulations by county and cluster in the United States</h4>
         <p>Which cluster do you want to map? Select <b>"All"</b> from the drop down list if you want to map all clusters.</p>
         <form action='/show_choro_map' method='POST' id='submitform'>
           <select name="input_num_choro">
-            <option value="1">One</option>
-            <option value="2">Two</option>
-            <option value="3">Three</option>
-            <option value="4">Four</option>
+            <option value="1">1 - Students / Weekend Warriors</option>
+            <option value="2">2 - Professionals</option>
+            <option value="3">3 - Engaged Professionals</option>
+            <option value="4">4 - Academics / Energy Supplementers</option>
             <option value="0">All</option>
           </select>
           <br><br>
@@ -626,18 +665,27 @@
           	<option value="ZW">Zimbabwe</option>
           </select>
           <br><br>
-          <p>Select a cluster:</p>
+          <p>Select a cluster:
+          </p>Select <b>"All"</b> from the drop down list if you want to map all clusters.</p>
           <select name="input_num_marker">
-            <option value="1">One</option>
-            <option value="2">Two</option>
-            <option value="3">Three</option>
-            <option value="4">Four</option>
+            <option value="1">1 - Students / Weekend Warriors</option>
+            <option value="2">2 - Professionals</option>
+            <option value="3">3 - Engaged Professionals</option>
+            <option value="4">4 - Academics / Energy Supplementers</option>
+            <option value="0">All</option>
           </select>
           <br><br>
           <input type="submit" value="Show me my map!"/>
         </form>
       </div>
     </section>
+
+    <hr class="featurette-divider">
+
+    <section id="nextsteps">
+      <div class="container">
+        <h2>Next Steps</h2>
+        <a href="#">Back to top</a>
 
     <hr class="featurette-divider">
 
@@ -674,7 +722,7 @@
           </div>
           <div class="col-lg-4 text-center">
             <i class="fa fa-github" style="font-size:50px" aria-hidden="true"></i>
-            <p><a style="color:black" href="https://github.com/stuart-d-king/homer_segmentation" target="_blank">Github Repo</a></p>
+            <p><a style="color:black" href="https://github.com/stuart-d-king/homer_segmentation/#readme" target="_blank">Github Repo</a></p>
           </div>
         </div>
       </div>
@@ -684,6 +732,7 @@
     <footer>
       <p class="pull-right"><a href="#">Back to top</a></p>
       <p>&copy; 2017 Stuart King</p>
+      <p><a href="https://icons8.com">Icon pack by Icons8</a></p>
     </footer>
 
   </div><!-- /.container -->

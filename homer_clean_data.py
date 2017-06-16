@@ -1,15 +1,10 @@
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import OneHotEncoder, LabelEncoder
-import pdb
-import itertools
 import requests
 import reverse_geocoder as rg
 import xml.etree.ElementTree as ET
 from collections import defaultdict
-import geocoder
-from uszipcode import ZipcodeSearchEngine
-import json
+import pdb
 
 def read_data():
     # df = pd.read_csv('data/combined_grid_and_run_data.csv', encoding='iso-8859-1')
@@ -208,7 +203,6 @@ def remove_outliers(df_):
 
     return clean_df
 
-
 def fips_codes(df):
     df = df[df['Country'] == 'US']
     latitude = df.Latitude.values
@@ -254,9 +248,8 @@ if __name__ == '__main__':
 
     # AFTER CLUSTERING
     # ---Read in clustered dataframes---
-    # df_clustered = pd.read_pickle('data/df_clustered.pkl')
+    df_clustered = pd.read_pickle('data/df_clustered.pkl')
     # df_users_clustered = pd.read_pickle('data/df_users_clustered.pkl')
-
 
     # ---Create USA dataframe with FIPS codes---
     # df_usa = fips_codes(df_clustered)
@@ -267,7 +260,7 @@ if __name__ == '__main__':
     # df_users_usa.to_pickle('data/df_users_usa.pkl')
 
     # ---Read back in pickled USA dataframes---
-    # df_usa = pd.read_pickle('data/df_usa.pkl')
+    df_usa = pd.read_pickle('data/df_usa.pkl')
     # df_users_usa = pd.read_pickle('data/df_users_usa.pkl')
 
     # ---Create user and full dataframe country dictionaries---
@@ -278,4 +271,3 @@ if __name__ == '__main__':
     # user_country_dct = defaultdict(list)
     # for idx, country in enumerate(df_users_clustered['Country']):
     #     user_country_dct[country].append(idx)
-    #

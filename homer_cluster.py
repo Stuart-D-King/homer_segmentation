@@ -6,13 +6,11 @@ from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import mca
-import pickle
-import pdb
 from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.mixture import GaussianMixture
 from sklearn.manifold import TSNE
-from sklearn.metrics.pairwise import pairwise_distances
-
+import pickle
+import pdb
 
 def one_hot(df_):
     df = df_.copy()
@@ -119,9 +117,6 @@ def prep_kmodes(df_):
                     ]
 
     df = df[cols_to_keep]
-
-    # df['UserRole'] = df['UserRole'].astype(object)
-    # df['OrganizationType'] = df['OrganizationType'].astype(object)
 
     le = LabelEncoder()
     enc_dct = dict()

@@ -91,10 +91,11 @@ def choropleth_map(cluster=0):
     m.save('static/img/choro_map.html')
 
 def marker_cluster_map(df, country, c_num):
-    centers = pd.read_pickle('../data/centers.pkl')
-
     df = df[df['Country'] == country]
-    df = df[df['Cluster'] == c_num]
+    if c_num != 0:
+        df = df[df['Cluster'] == cluster]
+
+    centers = pd.read_pickle('../data/centers.pkl')
 
     center_lat = centers.loc[centers['ISO3136'] == country, 'LAT'].tolist()[0]
     center_lng = centers.loc[centers['ISO3136'] == country, 'LONG'].tolist()[0]

@@ -6,10 +6,9 @@ import plotly
 from plotly.graph_objs import *
 from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
 import folium
-import pdb
 import seaborn as sns
 import scipy.stats as scs
-from homer_clean_data import remove_outliers
+import pdb
 
 def bar_charts(df):
     cols = ['ImportedWind', 'ImportedSolar', 'Sample']
@@ -23,12 +22,9 @@ def bar_charts(df):
         ax.set_xticks(range(1, 5))
         ax.axhline(y=np.mean(df[col]), color='red', linestyle='--')
 
-    # fig.suptitle('Average Number of Simulations Using a Particular Feature')
     fig.tight_layout()
-    # fig.subplots_adjust(top=0.9)
     plt.savefig('img/imports.png')
     plt.close()
-    # plt.show()
 
 def heat_map_users(df):
     fig = plt.figure(figsize=(8,4))
@@ -41,7 +37,6 @@ def heat_map_users(df):
     plt.yticks(rotation='horizontal')
     plt.savefig('img/user_heatmap.png', dpi=200)
     plt.close()
-    # plt.show()
 
 def heat_map_sims(df):
     fig = plt.figure(figsize=(8,4))
@@ -52,7 +47,6 @@ def heat_map_sims(df):
 
     plt.tight_layout()
     plt.yticks(rotation='horizontal')
-
     plt.show()
 
 def count_sims_cluster(df):
@@ -64,7 +58,6 @@ def count_sims_cluster(df):
     plt.tight_layout()
     plt.savefig('img/cluster_counts.png', dpi=200)
     plt.close()
-    # plt.show()
 
 def count_user_cluster(df):
     fig = plt.figure(figsize=(8,6))
@@ -127,14 +120,14 @@ def weekday_weekend(df_):
         weekday_count = weekday.groupby(weekday['Created'].dt.date)['User'].count()
         weekend_count = weekend.groupby(weekend['Created'].dt.date)['User'].count()
 
-        ax.hist(weekday_count.values, color='b', alpha=0.5, bins=30)#, normed=True)
+        ax.hist(weekday_count.values, color='b', alpha=0.5, bins=30, label='weekday')#, normed=True)
 
         # density = scs.kde.gaussian_kde(weekday_count.values)
         # x_vals = np.linspace(weekday_count.values.min(), weekday_count.values.max(), 100)
         # kde_vals = density(x_vals)
         # ax.plot(x_vals, kde_vals, 'b-', label='weekday')
 
-        ax.hist(weekend_count.values, color='g', alpha=0.5, bins=30)#, normed=True)
+        ax.hist(weekend_count.values, color='g', alpha=0.5, bins=30, label='weekend')#, normed=True)
 
         # density = scs.kde.gaussian_kde(weekend_count.values)
         # x_vals = np.linspace(weekend_count.values.min(), weekend_count.values.max(), 100)
@@ -148,14 +141,11 @@ def weekday_weekend(df_):
 
     plt.tight_layout()
     plt.savefig('img/weekday_weekend.png', dpi=200)
-    # plt.show()
 
-def cluster_bars(df):
+def cluster_bars_org(df):
     # categorical vs categorical vs numeric
     agg = df.groupby(['Cluster', 'OrganizationType'])['OrganizationType'].count()
-    # print(agg)
     agg = agg.unstack(level='OrganizationType')
-    # print(agg)
     fig, ax = plt.subplots(1, 1, figsize=(10, 4))
     agg.plot(kind='bar', ax=ax).set_ylabel('Simulations')
 
@@ -164,15 +154,31 @@ def cluster_bars(df):
     plt.xticks(rotation='horizontal')
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
           fancybox=True, shadow=True, ncol=6)
-    # ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-    # plt.legend(loc='best')
-    # plt.tight_layout()
-    ax.set_xlabel("")
+
+    ax.set_xlabel('')
     plt.savefig('img/sims_by_cluster_org.png', dpi=200)
     plt.close()
 
-def marker_map(df, title=None):
-    df = df[df['Cluster'] == 2]
+def cluster_bars_user(df):
+    # categorical vs categorical vs numeric
+    agg = df.groupby(['Cluster', 'UserRole'])['UserRole'].count()
+    agg = agg.unstack(level='UserRole')
+    fig, ax = plt.subplots(1, 1, figsize=(10, 4))
+    agg.plot(kind='bar', ax=ax).set_ylabel('Simulations')
+
+    plt.title('Number of Simulations by Cluster and User Role', fontsize=14)
+
+    plt.xticks(rotation='horizontal')
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
+          fancybox=True, shadow=True, ncol=4)
+
+    ax.set_xlabel('')
+    plt.savefig('img/sims_by_cluster_user.png', dpi=200)
+    plt.close()
+
+def marker_map(df, c_num=0):
+    if c_num != 0:
+        df = df[df['Cluster'] == cluster]
 
     sizes = df.NumSims.values
     m = folium.Map(location=[51.513, -0.137], zoom_start=3, tiles='Cartodb Positron')
@@ -189,7 +195,9 @@ def marker_map(df, title=None):
     marker_map.save('img/maps/marker_map.html')
 
 
-def choropleth_map(df, title=None):
+def choropleth_map(df, c_num=0):
+    if c_num != 0:
+        df = df[df['Cluster'] == cluster]
 
     def set_id_(fips):
         '''Modify FIPS code to match GeoJSON property'''
@@ -223,14 +231,12 @@ def choropleth_map(df, title=None):
 
     m.save('img/maps/choro_map.html')
 
-def marker_cluster_map(df_, country, c_num):
+def marker_cluster_map(df_, country, c_num=0):
     centers = pd.read_pickle('data/centers.pkl')
 
-    if c_num not in range(1,5):
-        print('Invalid cluster number entered.')
-
-    df = df_[df_['Country'] == country]
-    df = df[df['Cluster'] == c_num]
+    df = df[df['Country'] == country]
+    if c_num != 0:
+        df = df[df['Cluster'] == cluster]
 
     center_lat = centers.loc[centers['ISO3136'] == country, 'LAT'].tolist()[0]
     center_lng = centers.loc[centers['ISO3136'] == country, 'LONG'].tolist()[0]
@@ -255,8 +261,6 @@ if __name__ == '__main__':
     df = pd.read_pickle('data/df_clustered.pkl')
     # df_usa = pd.read_pickle('data/df_usa.pkl')
 
-    # create_map(df_users, title='first_map')
-    # choropleth_map(df_users_usa)
     # marker_cluster_map(df)
     # count_sims_cluster(df)
     # count_user_cluster(df)
@@ -268,14 +272,7 @@ if __name__ == '__main__':
     # time_series(df)
     # time_hist(df)
     # weekday_weekend(df)
-
-    # c0 = df[df['Cluster'] == 0]
-    # c1 = df[df['Cluster'] == 1]
-    # c2 = df[df['Cluster'] == 2]
-    # c3 = df[df['Cluster'] == 3]
-    # c4 = df[df['Cluster'] == 4]
-    # time_hist(c4)
-
     # choropleth_map(df_usa)
     # marker_cluster_map(df, 'DE', 2)
-    # cluster_bars(df)
+    # cluster_bars_user(df)
+    # cluster_bars_org(df)
