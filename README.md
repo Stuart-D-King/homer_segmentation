@@ -77,7 +77,7 @@ To explore and extract additional information from the data, I also created week
 
 Diving deeper into the number of simulations by cluster, the table below provides some insight into the frequency and variability at which users are interacting with the software in each cluster. Users in Cluster 1 have the highest average number of simulations, with Clusters 3 and 4 not far behind. Cluster 1 also has the greatest standard deviation, suggesting users in this cluster have the greatest variability in their interaction with the software. Users in Cluster 2 have the lowest average number of simulations, as well as the smallest standard deviation. It may be appropriate to classify these (on average) technical users as exploring the software's functionality, but not relying on it to extract actionable insights.
 
-|Cluster 1|Cluster 2|Cluster 3|Cluster 4
+Metric|Cluster 1|Cluster 2|Cluster 3|Cluster 4
 -----|--------:|--------:|--------:|--------:
 mean |    14.61|     5.42|    11.23|    11.06
 std  |    73.40|    35.28|    65.24|    50.44
@@ -98,7 +98,7 @@ True = generator modeled and more than two sizes tested
 False = generator modeled, but less than two sizes tested  
 NA = no generator modeled
 
-|Cluster 1: Count|Cluster 1: Total%|Cluster 2: Count|Cluster 2: Total%|Cluster 3: Count|Cluster 3: Total%|Cluster 4: Count|Cluster 4: Total%
+MultiGenSearch |Cluster 1: Count|Cluster 1: Total%|Cluster 2: Count|Cluster 2: Total%|Cluster 3: Count|Cluster 3: Total%|Cluster 4: Count|Cluster 4: Total%
 -----|---------------:|----------------:|---------------:|----------------:|---------------:|----------------:|---------------:|----------------:
 True |           34342|            12.52|           12160|            11.96|           55652|            26.41|             NaN|              NaN
 False|          239961|            87.48|           68544|            67.43|          101971|            48.40|             NaN|              NaN
@@ -106,7 +106,7 @@ NA   |             NaN|              NaN|           20951|            20.61|    
 
 For wind turbines:  
 
-|Cluster 1: Count|Cluster 1: Total%|Cluster 2: Count|Cluster 2: Total%|Cluster 3: Count|Cluster 3: Total%|Cluster 4: Count|Cluster 4: Total%
+MultiWindSearch |Cluster 1: Count|Cluster 1: Total%|Cluster 2: Count|Cluster 2: Total%|Cluster 3: Count|Cluster 3: Total%|Cluster 4: Count|Cluster 4: Total%
 -----|---------------:|----------------:|---------------:|----------------:|---------------:|----------------:|---------------:|----------------:
 True |           23771|             8.67|            6538|             6.43|           45076|            21.39|           19473|             9.38
 False|           72393|            26.39|           14933|            14.69|           17282|             8.20|           39446|            19.00
@@ -114,7 +114,7 @@ NA   |          178139|            64.94|           80184|            78.88|    
 
 For batteries:  
 
-|Cluster 1: Count|Cluster 1: Total%|Cluster 2: Count|Cluster 2: Total%|Cluster 3: Count|Cluster 3: Total%|Cluster 4: Count|Cluster 4: Total%
+MultiBatSearch |Cluster 1: Count|Cluster 1: Total%|Cluster 2: Count|Cluster 2: Total%|Cluster 3: Count|Cluster 3: Total%|Cluster 4: Count|Cluster 4: Total%
 -----|---------------:|----------------:|---------------:|----------------:|---------------:|----------------:|---------------:|----------------:
 True |           47458|            17.30|            4908|             4.83|          180294|            85.57|           53537|            25.79
 False|          192038|            70.01|            8491|             8.35|           17840|             8.47|           96982|            46.72
@@ -122,7 +122,7 @@ NA   |           34807|            12.69|           88256|            86.82|    
 
 For solar panels (PV):  
 
-|Cluster 1: Count|Cluster 1: Total%|Cluster 2: Count|Cluster 2: Total%|Cluster 3: Count|Cluster 3: Total%|Cluster 4: Count|Cluster 4: Total%
+MultiPvSearch |Cluster 1: Count|Cluster 1: Total%|Cluster 2: Count|Cluster 2: Total%|Cluster 3: Count|Cluster 3: Total%|Cluster 4: Count|Cluster 4: Total%
 -----|---------------:|----------------:|---------------:|----------------:|---------------:|----------------:|---------------:|----------------:
 True |           52175|            19.02|           18130|            17.83|          180702|            85.77|           61286|            29.52
 False|          198295|            72.29|           24919|            24.51|           20660|             9.81|          126397|            60.88
@@ -130,7 +130,7 @@ NA   |           23833|             8.69|           58606|            57.65|    
 
 For converters:  
 
-|Cluster 1: Count|Cluster 1: Total%|Cluster 2: Count|Cluster 2: Total%|Cluster 3: Count|Cluster 3: Total%|Cluster 4: Count|Cluster 4: Total%
+MultiConSearch |Cluster 1: Count|Cluster 1: Total%|Cluster 2: Count|Cluster 2: Total%|Cluster 3: Count|Cluster 3: Total%|Cluster 4: Count|Cluster 4: Total%
 -----|---------------:|----------------:|---------------:|----------------:|---------------:|----------------:|---------------:|----------------:
 True |           31383|            11.44|            3688|             3.63|          151055|            71.69|           38973|            18.77
 False|          229500|            83.67|           12524|            12.32|           52750|            25.04|          138527|            66.73
