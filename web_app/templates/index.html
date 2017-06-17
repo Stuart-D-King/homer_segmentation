@@ -79,7 +79,12 @@
               <ul class="nav navbar-nav">
                 <li class="active"><a href="/">Home</a></li>
                 <li><a href="#overview">Overview</a></li>
-                <li><a href="#results">Results</a></li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Results<span class="caret"></span></a>
+                  <ul class="dropdown-menu">
+                    <li><a href="#eda">Exploratory Analysis</a></li>
+                    <li><a href="#profiles">Cluster Profiles</a></li>
+                  </ul>
                 <li><a href="#mapcreator">Map Creator</a></li>
                 <li><a href="#nextsteps">Next Steps</a></li>
                 <li><a href="#contact">Contact</a></li>
@@ -275,7 +280,7 @@
 
     <hr class="featurette-divider">
 
-    <section id="results">
+    <section id="eda">
       <div class="container">
         <h2>Results</h2>
         <a href="#">Back to top</a>
@@ -329,7 +334,7 @@
             </div>
 
           <div>
-            <p>HOMER also considers the extent to which a simulation models a variety of microgrid parameters and configurations as a strong indicator of the simulation's realness. For each simulation, a user is able to specify what energy hardware (e.g. batteries, turbines, solar panels, etc.) she would like to model, as well a range of hardward specifications for the software to compare and output an optimized microgrid (optimization is defined by the the lowest net present cost of microgrid system). Per conversations with HOMER, a rough metric to judge a simulaiton's realness is whether the user provides more than two different hardware specifications to test. For this reason, I crafted a series of features that checks whether a user modeled a certain piece of hardware, and if so, if the simulations was run with multiple hardware specifications for that particular hardware category.</p>
+            <p>HOMER also considers the extent to which a simulation models a variety of microgrid parameters and configurations as a strong indicator of the simulation's realness. For each simulation, a user is able to specify what energy hardware (e.g. batteries, turbines, solar panels, etc.) she would like to model, as well a range of hardward specifications for the software to compare and output an optimized microgrid (optimization is defined by the the lowest net present cost of microgrid system). Per conversations with HOMER, a rough metric to judge a simulaiton's realness is whether the user provides more than two different hardware specifications to test. For this reason, I crafted a series of features that check whether a user modeled a certain piece of hardware, and if so, if the simulation tested multiple specifications/capacities for that particular hardware category.</p>
             <p>For generators, the breakdown of simulations that modeled generators, and if more than two generator sizes were tested is as follows.</p>
             <p><b>Key:</b></p>
             <p>True = generator modeled and more than two sizes tested</p>
@@ -344,47 +349,50 @@
             <p>{{df_pv|safe}}</p>
             <p>For converters:</p>
             <p>{{df_con|safe}}</p>
+          </div>
+      </section>
 
-        <h3>Cluster Profiles</h3>
-        <h4>Cluster 1 - Students and weekend warriors</h4>
-        <!-- Graduation Cap icon by Icons8 -->
-        <img src="https://png.icons8.com/graduation-cap/color/96" title="Graduation Cap" width="96" height="96">
-        <!-- Library icon by Icons8 -->
-        <img src="https://png.icons8.com/library/color/96" title="Library" width="96" height="96">
-        <!-- Sunday icon by Icons8 -->
-        <img src="https://png.icons8.com/sunday/color/96" title="Sunday" width="96" height="96">
+      <section id="profiles">
+        <div class="container">
+          <h3>Cluster Profiles</h3>
+          <a href="#">Back to top</a>
+          <h4>Cluster 1 - Students and weekend warriors</h4>
+          <!-- Graduation Cap icon by Icons8 -->
+          <img src="https://png.icons8.com/graduation-cap/color/96" title="Graduation Cap" width="96" height="96">
+          <!-- Library icon by Icons8 -->
+          <img src="https://png.icons8.com/library/color/96" title="Library" width="96" height="96">
+          <!-- Sunday icon by Icons8 -->
+          <img src="https://png.icons8.com/sunday/color/96" title="Sunday" width="96" height="96">
 
-        <h4>Cluster 2 - Technical professionals not interacting too much, but possibly interested in wind power</h4>
-        <!-- Engineer icon by Icons8 -->
-        <img src="https://png.icons8.com/engineer/color/96" title="Engineer" width="96" height="96">
-        <!-- Factory icon by Icons8 -->
-        <img src="https://png.icons8.com/factory/color/96" title="Factory" width="96" height="96">
-        <!-- Windy Weather icon by Icons8 -->
-        <img src="https://png.icons8.com/windy-weather/color/96" title="Windy Weather" width="96" height="96">
+          <h4>Cluster 2 - Less active technical professionals possibly interested in wind power</h4>
+          <!-- Engineer icon by Icons8 -->
+          <img src="https://png.icons8.com/engineer/color/96" title="Engineer" width="96" height="96">
+          <!-- Factory icon by Icons8 -->
+          <img src="https://png.icons8.com/factory/color/96" title="Factory" width="96" height="96">
+          <!-- Windy Weather icon by Icons8 -->
+          <img src="https://png.icons8.com/windy-weather/color/96" title="Windy Weather" width="96" height="96">
 
-        <h4>Cluster 3 - The sweet spot...technical professionals looking for the right microgrid</h4>
-        <!-- Engineer icon by Icons8 -->
-        <img src="https://png.icons8.com/engineer/color/96" title="Engineer" width="96" height="96">
-        <!-- Factory icon by Icons8 -->
-        <img src="https://png.icons8.com/factory/color/96" title="Factory" width="96" height="96">
-        <!-- Engine icon by Icons8 -->
-        <img src="https://png.icons8.com/engine/color/96" title="Engine" width="96" height="96">
-        <!-- Car Battery icon by Icons8 -->
-        <img src="https://png.icons8.com/car-battery/color/96" title="Car Battery" width="96" height="96">
-        <!-- Sun icon by Icons8 -->
-        <img src="https://png.icons8.com/sun/color/96" title="Sun" width="96" height="96">
-        <!-- Electricity icon by Icons8 -->
-        <img src="https://png.icons8.com/electricity/color/96" title="Electricity" width="96" height="96">
+          <h4>Cluster 3 - Engaged technical professionals simulating a variety of system configurations</h4>
+          <!-- Engineer icon by Icons8 -->
+          <img src="https://png.icons8.com/engineer/color/96" title="Engineer" width="96" height="96">
+          <!-- Factory icon by Icons8 -->
+          <img src="https://png.icons8.com/factory/color/96" title="Factory" width="96" height="96">
+          <!-- Engine icon by Icons8 -->
+          <img src="https://png.icons8.com/engine/color/96" title="Engine" width="96" height="96">
+          <!-- Car Battery icon by Icons8 -->
+          <img src="https://png.icons8.com/car-battery/color/96" title="Car Battery" width="96" height="96">
+          <!-- Sun icon by Icons8 -->
+          <img src="https://png.icons8.com/sun/color/96" title="Sun" width="96" height="96">
+          <!-- Electricity icon by Icons8 -->
+          <img src="https://png.icons8.com/electricity/color/96" title="Electricity" width="96" height="96">
 
-        <h4>Cluster 4 - Academic professionals and other professionals looking to supplement energy reserves</h4>
-        <!-- Graduation Cap icon by Icons8 -->
-        <img src="https://png.icons8.com/graduation-cap/color/96" title="Graduation Cap" width="96" height="96">
-        <!-- Library icon by Icons8 -->
-        <img src="https://png.icons8.com/library/color/96" title="Library" width="96" height="96">
-        <!-- Recycling symbol icon by Icons8 -->
-        <img src="https://png.icons8.com/recycling-symbol/color/96" title="Recycling symbol" width="96" height="96">
-
-
+          <h4>Cluster 4 - Academic professionals and other professionals looking to supplement energy reserves</h4>
+          <!-- Graduation Cap icon by Icons8 -->
+          <img src="https://png.icons8.com/graduation-cap/color/96" title="Graduation Cap" width="96" height="96">
+          <!-- Library icon by Icons8 -->
+          <img src="https://png.icons8.com/library/color/96" title="Library" width="96" height="96">
+          <!-- Recycling symbol icon by Icons8 -->
+          <img src="https://png.icons8.com/recycling-symbol/color/96" title="Recycling symbol" width="96" height="96">
       </div>
     </section>
 
@@ -407,6 +415,8 @@
           <br><br>
           <input type='submit' value="Show me my map!"/>
         </form>
+        <br>
+        <p><b>Notes</b>: HOMER Energy is based in Boulder, CO and is a frequent partner with the Univeristy of Colorado Boulder. For this reason, software activity in Boulder County is often disproportionally represented. In addition, the HOMER software is a preferred team choice for the <a href="https://www.nyserda.ny.gov/All-Programs/Programs/NY-Prize" target="_blank">New York Prize</a> competition. As such, simulaiton activity is also high in the New York City area.
       </div>
       <div class="container">
         <h2>Marker Cluster Map Creator</h2>
@@ -686,6 +696,14 @@
       <div class="container">
         <h2>Next Steps</h2>
         <a href="#">Back to top</a>
+        <p>Segmenting simulation runs is an important first step in understanding who is using HOMER's software and where its partners can best focus their marketing and outreach. A close look at the four clusters illuminates distinct characteristics that suggest a varying degree of seriousness or interest from the user. While this information can be immediately helpful in targeting the right users, further exploration and model tuning will certainly add value and precision to determining the realness of a simulated project. Below are a few suggestions of ways to expand upon the findings of this project:
+        <ul>
+          <li>A review of feature importance would like result in new or adjusted model variables that could lead to more robust clustering. Furthermore, applying a heuristic weight to each simulation and exploring graph theory to model pairwise relationships between observations is a possible way to arrive at a 'realness' metric.</li>
+          <li>The project currently aggregates three years of software simulations. Exploring ways to incorporate methods that further slice the data and outcomes into time segments would likely prove useful to better understand the relevancy and timeliness of simulations.</li>
+          <li>It is recommended that HOMER begin surveying its software users to learn the intensions and outcomes of the simulations. With this new data HOMER can begin to explore powerful predictive models that will present internal and external analytical opportunities.</li>
+        </ul>
+
+
 
     <hr class="featurette-divider">
 

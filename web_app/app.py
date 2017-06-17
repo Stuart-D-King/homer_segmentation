@@ -93,7 +93,7 @@ def choropleth_map(cluster=0):
 def marker_cluster_map(df, country, c_num):
     df = df[df['Country'] == country]
     if c_num != 0:
-        df = df[df['Cluster'] == cluster]
+        df = df[df['Cluster'] == c_num]
 
     centers = pd.read_pickle('../data/centers.pkl')
 
@@ -123,7 +123,7 @@ def usersims_by_cluster(df):
     cluster_df['Cluster 3'] = pt.iloc[:, 2].values
     cluster_df['Cluster 4'] = pt.iloc[:, 3].values
 
-    output = round(cluster_df.describe(), 2)
+    output = round(cluster_df.describe().loc[['mean', 'std', 'max']], 2)
     return output.to_html()
 
 # home page
