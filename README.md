@@ -34,8 +34,7 @@ Other unsupervised clustering algorithms were also tested on the data, including
 
 Once the cluster algorithm was selected, I needed to determine the appropriate amount of clusters to segment the data. In KMeans clustering, it is common to perform a dimensionality reduction technique such as principle component analysis (PCA) to plot the resulting clusters in a two dimensional space to visually confirm clustering is taking place. However, because applying PCA to categorical data is generally regarded as unwise, I instead opted to calculate a silhouette score based on a hamming distance metric for a range of cluster quantities to settle on the most appropriate number of customer segments. When calculating the silhouette coefficient, the best possible value is 1, indicating all data points are perfected grouped and there are no overlapping clusters. A coefficient of 0 implies overlapping clusters, and negative values suggest that a sample has been assigned to the wrong cluster. Based on the below graphics, I decided to cluster my data into four clusters. I selected k=4 because the silhouette score was only slightly lower than k=3, and based on my conversations with HOMER four customer segments fit aligned closely with expected user types. Furthermore, while the silhouette score for k=7 was also similar, I ultimately decided an analysis of seven customer segments would be more appropriate for future analysis.
 
-<!-- ![silhouette_vs_k](img/silhouette/sil_v_clust_KM.png) -->
-<img src='img/silhouette/sil_v_clust_KM.png' alt="sil_v_clust" style="width:200px;"/>
+![silhouette_vs_k](img/silhouette/sil_v_clust_KM.png)
 
 After selecting the appropriate number of clusters I fitted the KModes clustering algorithm to the data and assigned cluster labels to each simulation. I then performed exploratory data analysis to begin extracting meaningful business intelligence from the clusters.
 
@@ -62,18 +61,15 @@ Service    | 16545|  2.08
 
 After assigning cluster labels to each user using KModes, we can see that the total number of simulations is fairly well distributed among the four clusters, with a larger share going to Cluster 1 and a smaller share to Cluster 2.
 
-<!-- ![cluster_counts](img/cluster_counts.png) -->
-<img src='img/cluster_counts.png' alt="cluster_counts" style="width:300px;"/>
+![cluster_counts](img/cluster_counts.png)
 
 Looking at the distribution of user roles in each cluster, we can see that the model has split the user roles into particular clusters, but not exclusively into just one. Academic users are the majority it in Clusters 1 and 4, and technical users are more prevalent Clusters 2 and 3.
 
-<!-- ![sims_by_cluster_user](img/sims_by_cluster_user.png) -->
-<img src='img/sims_by_cluster_user.png' alt="sims_by_cluster_user" style="width:400px;"/>
+![sims_by_cluster_user](img/sims_by_cluster_user.png)
 
 Similarly, the distribution of organization type among the clusters aligns closely with the user role distributions. Academic institutions are the majority in Clusters 1 and 4, and engineering firms are most common in Clusters 2 and 3.
 
-<!-- ![sims_by_cluster_org](img/sims_by_cluster_org.png) -->
-<img src='img/sims_by_cluster_org.png' alt="sims_by_cluster_org" style="width:400px;"/>
+![sims_by_cluster_org](img/sims_by_cluster_org.png)
 
 To explore and extract additional information from the data, I also created weekday and weekend histograms of the number of simulations per day for each cluster. The resultant graphs suggest similar, but subtle differences between the four groups. While the number of simulations per day is on average highest during the week for all four clusters, we can see from the histograms for Cluster 1 that the frequency of simulations on the weekend does not differ as severely as compared to the other three groups. This could be due to the fact that there is large majority of academic users in this cluster, and students are more likely to run simulations over the weekend for school projects. Building on this analysis, Cluster 4, which also has a majority of academic users and organizations, appears to have relatively high kurtosis due to a few extreme deviations (outliers). While the weekend simulations seem to be infrequent in Cluster 4, there are a handful of days in which the cumulative sum of simulations have reached into the thousands. The true nature of these simulations likely requires further analysis to determine if the simulations are being run with project implementation in mind, or as part of academic research endeavor. Clusters 2 and 3 also suggest minimal weekend software usage, with Cluster 3 depicting a distribution suggestive of more model runs per day.
 
@@ -155,8 +151,7 @@ Segmenting simulation runs is an important first step in understanding who is us
 ### Technology Stack
 The following software packages and technologies were used in this project.
 
-<!-- ![tech_stack](img/techstack.png) -->
-<img src='img/techstack.png' alt="techstack" style="width:300px;"/>
+![tech_stack](img/techstack.png)
 
 ### Contact
 Please contact me with questions or comments at <sdking49@gmail.com>.
