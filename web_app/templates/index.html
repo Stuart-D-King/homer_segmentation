@@ -163,13 +163,13 @@
         <h3>Objective</h3>
         <p>HOMER Energy is a world leader in accurately modeling microgrid optimization. The HOMER (Hybrid Optimization of Multiple Energy Resources) software allows users to understand how to build cost effective and reliable microgrids that combine traditionally generated and renewable power, storage, and load management. HOMER Energy also offers software training, microgrid consulting expertise, and market access support to its vendor partners.</p>
 
-        <p>As the microgrid market continues to expand, HOMER and its vendor partners needs to better understand its software users' behavior and intensions. The objective of this study is to extract structure and meaning from HOMER Energy's collection of software simulations. By being able to segment its customer base, HOMER can enhance the market access branch of its business model by providing its vendor partners with more reliable information related to the micrgrid consumer market. Understanding which software users more likely to initialize micogrids is information all vendors want to know to better target those customers ready to get started.</p>
+        <p>As the microgrid market continues to expand, HOMER and its vendor partners need to better understand its software users' behavior and intentions. The objective of this study is to extract structure and meaning from HOMER Energy's collection of software simulations. By being able to segment its customer base, HOMER can enhance the market access branch of its business model by providing its vendor partners with more reliable information related to the microgrid consumer market. Understanding which software users are more likely to initiate micogrids is information all vendors want to know to better target those consumers who are ready to get started.</p>
       </div>
 
       <div class="container">
         <h3>Process</h3>
         <h4>Data Preprocessing</h4>
-        <p>The first and very important step in this process was to understand the data and prepare it for modeling. The HOMER software is extremely powerful and capable of modeling hundreds of microgird configurations at once. Because the software has predictive capabilities built into it, my task was to understand which features in the data space would be insightful for determining the realness or seriousness of a project. Initial features were selected based on consultations with my HOMER counterpart, Jordan Esbin, as well as my participation in HOMER's online software training series. After selecting the appropriate user input features, I performed a variety of data munging and cleaning steps using the Pandas data analysis library. For example, I bucketed the User Role and Organization Type variables into categories such as academic, business, technical, and undefined, and categorized whether or not a simulation modeled certain types of energy hardware. This extensive data cleaning step reduced the features space from 144 variables to 17. Final model features include:</p>
+        <p>The first in this process was to understand the data and prepare it for modeling. The HOMER software is extremely powerful and capable of modeling hundreds of microgird configurations at once. Because the software has predictive capabilities built into it, my task was to understand which features in the data space would be insightful for determining the realness or seriousness of a project. Initial features were selected based on consultations with my HOMER counterpart, Jordan Esbin, as well as my participation in HOMER's online software training series. After selecting the appropriate user input features, I performed a variety of data munging and cleaning steps using the Pandas data analysis library. For example, I bucketed the User Role and Organization Type variables into categories such as academic, business, technical, and undefined, and categorized whether or not a simulation modeled certain types of energy hardware. This extensive data cleaning step reduced the features space from 144 variables to 17. Final model features include:</p>
         <table>
           <tr>
             <th>Feature</th>
@@ -262,11 +262,11 @@
       <div class="container">
         <h4>Model Development</h4>
         <p>Because HOMER does not currently have a way of tracking which of its software users have become microgrid implementers, I explored various unsupervised clustering algorithms to model the underlying structure of the data. KMeans is a common clustering algorithm that groups data according to existing similarities. However, because the similarity metric used in KMeans is the computed euclidean distance between each data point and the centroids of each cluster, the KMeans algorithm is not appropriate for non-numerical data. A more appropriate clustering algorithm is KModes. KModes is an extension of KMeans, however, instead of calculating distance, it quantifies the total number of mismatched categories between two objects: the small the number, the more similar the two objects. In addition, KModes uses modes instead of means, in which the mode is a vector of elements that minimizes the dissimilarities between the vector and an individual data point.</p>
-        <p>Other unsupervised clustering algorithms were also tested on the data, including hierarchical agglomerative clustering and gaussian mixture models. To test these algorithms, I used one-hot encoding to further transform the feature space into binary/dummy variables. Both algorithms produced clustered results, however, the interpretability of the clusters was compromised due to the inherent non-numerical nature of the data. For this reason, I settled on KModes as the algorithm to formulate my findings. For a deep dive into kmodes clustering, check out Zhexue Huang's excellent <a href="http://arbor.ee.ntu.edu.tw/~chyun/dmpaper/huanet98.pdf">research paper</a> on the topic.</p>
+        <p>Other unsupervised clustering algorithms were also tested on the data, including hierarchical agglomerative clustering and gaussian mixture models. To test these algorithms, I used one-hot encoding to further transform the feature space into binary/dummy variables. Both algorithms produced clustered results, however, the interpretability of the clusters was compromised due to the inherent non-numerical nature of the data. For this reason, I settled on KModes as the algorithm to formulate my findings. For a deep dive into KModes clustering, check out Zhexue Huang's excellent <a href="http://arbor.ee.ntu.edu.tw/~chyun/dmpaper/huanet98.pdf">research paper</a> on the topic.</p>
       </div>
 
       <div class="container">
-        <p>Once the cluster algorithm was selected, I needed to determine the appropriate amount of clusters to segment the data. In KMeans clustering, it is common to perform a dimensionality reduction technique such as principle component analysis (PCA) to plot the resulting clusters in a two dimensional space to visually confirm clustering is taking place. However, because applying PCA to categorical data is generally regarded as unwise, I instead opted to calcuate a silhouette score for different numbers of clusters based on a hamming distance metric to settle on the most appropriate number of customer segments. When calcuating the silhouette coefficient, the best possible value is 1, indicating all data points are perfected groupped and there are no overlapping clusters. A coefficient of 0 implies overlapping clusters, and negative values suggest that a sample has been assigned to the wrong cluster. Based on the below plot of scores, I decided to cluster my data into four clusters. I selected k=4 because the silhouette score was the highest for this number of clusteres, and it made intuitive sense based on my understanding of HOMER's customer base.</p>
+        <p>Once the cluster algorithm was selected, I needed to determine the appropriate amount of clusters to segment the data. In KMeans clustering, it is common to perform a dimensionality reduction technique such as principle component analysis (PCA) to plot the resulting clusters in a two dimensional space to visually confirm clustering is taking place. However, because applying PCA to categorical data is generally regarded as unwise, I instead opted to calcuate a silhouette score for different numbers of clusters based on a hamming distance metric to settle on the most appropriate number of customer segments. When calcuating the silhouette coefficient, the best possible value is 1, indicating all data points are perfected grouped and there are no overlapping clusters. A coefficient of 0 implies overlapping clusters, and negative values suggest that a sample has been assigned to the wrong cluster. Based on the below plot of scores, I decided to cluster my data into four clusters. I selected k=4 because the silhouette score was the highest for this number of clusters, and it made intuitive sense based on my understanding of HOMER's customer base.</p>
       </div>
 
       <div class="container">
@@ -274,7 +274,7 @@
       </div>
 
       <div class="container">
-        <p>After selecting the appropriate number of clusters I fitted the KModes clustering algorithm to the data and assigned cluster labels to each simulation. I then performed exploratory data analysis to begin extracting meaningful business intelligence from the clusters.</p>
+        <p>After selecting the appropriate number of clusters, I fitted the KModes clustering algorithm to the data and assigned cluster labels to each simulation. I then performed exploratory data analysis to begin extracting meaningful business intelligence from the clusters.</p>
       </div>
     </section>
 
@@ -334,8 +334,8 @@
             </div>
 
           <div>
-            <p>HOMER also considers the extent to which a simulation models a variety of microgrid parameters and configurations as a strong indicator of the simulation's realness. For each simulation, a user is able to specify what energy hardware (e.g. batteries, turbines, solar panels, etc.) she would like to model, as well a range of hardware specifications for the software to compare and output an optimized microgrid (optimization is defined by the the lowest net present cost of microgrid system). Per conversations with HOMER, a rough metric to judge a simulation's realness is whether the user provides more than two different hardware specifications to test. For this reason, I crafted a series of features that check whether a user modeled a certain piece of hardware, and if so, if the simulation tested multiple specifications/capacities for that particular hardware category.</p>
-            <p>For generators, the breakdown of simulations that modeled generators, and if more than two generator sizes were tested is as follows.</p>
+            <p>HOMER also considers the extent to which a simulation models a variety of microgrid parameters and configurations as a strong indicator of the simulation's realness. For each simulation, a user is able to specify what energy hardware (e.g. batteries, turbines, solar panels, etc.) s/he would like to model, as well a range of hardware specifications for the software to compare and output an optimized microgrid (optimization is defined by the the lowest net present cost of microgrid system). Per conversations with HOMER, a rough metric to judge a simulation's realness is whether the user provides more than two different hardware specifications to test. For this reason, I crafted a series of features that check whether a user modeled a certain piece of hardware, and if so, if the simulation tested multiple specifications/capacities for that particular hardware category.</p>
+            <p>For generators, the breakdown of simulations that modeled generators, and if more than two generator sizes were tested is as follows:</p>
             <p><b>Key:</b></p>
             <p>True = generator modeled and more than two sizes tested</p>
             <p>False = generator modeled, but less than two sizes tested</p>
@@ -416,7 +416,7 @@
           <input type='submit' value="Show me my map!"/>
         </form>
         <br>
-        <p><b>Notes</b>: HOMER Energy is based in Boulder, CO and frequently partners with the Univeristy of Colorado Boulder. For this reason, software activity in Boulder County is often disproportionally represented. In addition, the HOMER software is a preferred team choice for the <a href="https://www.nyserda.ny.gov/All-Programs/Programs/NY-Prize" target="_blank">New York Prize</a> competition. As such, simulaiton activity is also high in the New York City area.
+        <p><b>Notes</b>: HOMER Energy is based in Boulder, CO and frequently partners with the Univeristy of Colorado Boulder. For this reason, software activity in Boulder County is often disproportionally represented. In addition, the HOMER software is a preferred team choice for the <a href="https://www.nyserda.ny.gov/All-Programs/Programs/NY-Prize" target="_blank">New York Prize</a> competition. As such, simulation activity is also high in the New York City area.
       </div>
       <div class="container">
         <h2>Marker Cluster Map Creator</h2>
@@ -698,9 +698,10 @@
         <a href="#">Back to top</a>
         <p>Segmenting simulation runs is an important first step in understanding who is using HOMER's software and where its partners can best focus their marketing and outreach. A close look at the four clusters illuminates distinct characteristics that suggest a varying degree of seriousness or interest from the user. While this information can be immediately helpful in targeting the right users, further exploration and model tuning will certainly add value and precision to determining the realness of a simulated project. Below are a few suggestions of ways to expand upon the findings of this project:</p>
         <ul>
-          <li>A review of feature importance would like result in new or adjusted model variables that could lead to more robust clustering. Furthermore, applying a heuristic weight to each simulation and exploring graph theory to model pairwise relationships between observations is a possible way to arrive at a 'realness' metric.</li>
+          <li>A review of feature importance would likely result in new or adjusted model variables that could lead to more robust clustering. Furthermore, applying a heuristic weight to each simulation and exploring graph theory to model pairwise relationships between observations is a possible way to arrive at a 'realness' metric.</li>
           <li>The project currently aggregates three years of software simulations. Exploring ways to incorporate methods that further slice the data and outcomes into time segments would likely prove useful to better understand the relevancy and timeliness of simulations.</li>
-          <li>It is recommended that HOMER begin surveying its software users to learn the intensions and outcomes of the simulations. With this new data HOMER can begin to explore powerful predictive models that will present internal and external analytical opportunities.</li>
+          <li>It is recommended that HOMER begin surveying its software users to learn the intentions and outcomes of the simulations. With this new data HOMER can begin to explore powerful predictive models that will present internal and external analytical opportunities.</li>
+          <li>While mapping the various cluster simulations in different countries, it was observed that repeated simulations were often run close to airports. This behavior makes sense given the need for all airports to maintain constant connectivity. It is recommended that HOMER and/or its supply partners explore direct marketing to airports who through multiple simulations have shown interest in establishing supplemental energy resources or standalone microgrids.</li>
         </ul>
       </div>
     </secton>
@@ -736,11 +737,11 @@
           </div>
           <div class="col-lg-4 text-center">
             <i class="fa fa-file-text" style="font-size:45px"></i>
-            <p><a style="color:black" href="https://github.com/stuart-d-king/homer_segmentation" target="_blank">Resume</a></p>
+            <p><a style="color:black" href="../static/img/resume_sking.pdf" target="_blank">Resume</a></p>
           </div>
           <div class="col-lg-4 text-center">
             <i class="fa fa-github" style="font-size:50px" aria-hidden="true"></i>
-            <p><a style="color:black" href="https://github.com/stuart-d-king/homer_segmentation/#readme" target="_blank">Github Repo</a></p>
+            <p><a style="color:black" href="https://github.com/stuart-d-king/homer_segmentation/" target="_blank">Github Repo</a></p>
           </div>
         </div>
       </div>
