@@ -404,7 +404,7 @@
         <a href="#">Back to top</a>
         <h4>Make a choropleth map of the number of software simulations by county and cluster in the United States</h4>
         <p>Which cluster do you want to map? Select <b>"All"</b> from the drop down list if you want to map all clusters.</p>
-        <form action='/show_choro_map' method='POST' id='submitform'>
+        <form action='/show_choro_map' target="_blank" method='POST' id='submitform'>
           <select name="input_num_choro">
             <option value="1">1 - Students / Weekend Warriors</option>
             <option value="2">2 - Professionals</option>
@@ -421,7 +421,7 @@
       <div class="container">
         <h2>Marker Cluster Map Creator</h2>
         <h4>Make a marker cluster map of the number of software simulations by country and cluster</h4>
-        <form action='/show_marker_map' method='POST' id='submitform'>
+        <form action='/show_marker_map' target="_blank" method='POST' id='submitform'>
           <p>Select a country:</p>
           <select name="input_country">
           	<option value="AF">Afghanistan</option>
