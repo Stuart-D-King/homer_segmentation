@@ -2,11 +2,11 @@
 ### Problem Statement
 [HOMER Energy](http://www.homerenergy.com/) is a world leader in accurately modeling microgrid optimization. The HOMER (Hybrid Optimization of Multiple Energy Resources) software allows users to understand how to build cost effective and reliable microgrids that combine traditionally generated and renewable power, storage, and load management. HOMER Energy also offers software training, microgrid consulting expertise, and market access support to its vendor partners.
 
-As the microgrid market continues to expand, HOMER and its vendor partners needs to better understand its software users' behavior and intensions. The objective of this study is to extract structure and meaning from HOMER Energy's collection of user software simulations. By being able to segment its customer base, HOMER can enhance the market access branch of its business model by providing its vendor partners with more reliable information related to the micrgrid consumer market. Understanding which software users more likely to initialize micogrids is information all vendors want to know to better target those customers ready to get started.
+As the microgrid market continues to expand, HOMER and its vendor partners need to better understand its software users' behavior and intentions. The objective of this study is to extract structure and meaning from HOMER Energy's collection of user software simulations. By being able to segment its customer base, HOMER can enhance the market access branch of its business model by providing its vendor partners with more reliable information related to the microgrid consumer market. Understanding which software users are more likely to initiate micogrids is information all vendors want to know to better target those consumers who are ready to get started.
 
 ### Process
 #### Data Preprocessing
-The first and very important step in this process was to understand the data and prepare it for modeling. The HOMER software is extremely powerful and capable of modeling hundreds of microgird configurations at once. Because the software has predictive capabilities built into it, my task was to understand which features in the data space would be insightful for determining the realness or seriousness of a project. Initial features were selected based on consultations with my HOMER counterpart, Jordan Esbin, as well as my participation in HOMER's online software training series. After selecting the appropriate user input features, I performed a variety of data munging and cleaning steps using the Pandas data analysis library. For example, I bucketed the User Role and Organization Type variables into categories such as academic, business, technical, and undefined, and categorized whether or not a simulation modeled certain types of energy hardware. This extensive data cleaning step reduced the features space from 144 variables to 17. Final model features include:
+The first step in this process was to understand the data and prepare it for modeling. The HOMER software is extremely powerful and capable of modeling hundreds of microgird configurations at once. Because the software has predictive capabilities built into it, my task was to understand which features in the data space would be insightful for determining the realness or seriousness of a project. Initial features were selected based on consultations with my HOMER counterpart, Jordan Esbin, as well as my participation in HOMER's online software training series. After selecting the appropriate user input features, I performed a variety of data munging and cleaning steps using the Pandas data analysis library. For example, I bucketed the User Role and Organization Type variables into categories such as academic, business, technical, and undefined, and categorized whether or not a simulation modeled certain types of energy hardware. This extensive data cleaning step reduced the features space from 144 variables to 17. Final model features include:
 
 | Feature   | Description | Data Type |
 | -------   | ----------- | --------- |
@@ -34,10 +34,10 @@ Other unsupervised clustering algorithms were also tested on the data, including
 
 Once the cluster algorithm was selected, I needed to determine the appropriate amount of clusters to segment the data. In KMeans clustering, it is common to perform a dimensionality reduction technique such as principle component analysis (PCA) to plot the resulting clusters in a two dimensional space to visually confirm clustering is taking place. However, because applying PCA to categorical data is generally regarded as unwise, I instead opted to calculate a silhouette score based on a hamming distance metric for a range of cluster quantities to settle on the most appropriate number of customer segments. When calculating the silhouette coefficient, the best possible value is 1, indicating all data points are perfected grouped and there are no overlapping clusters. A coefficient of 0 implies overlapping clusters, and negative values suggest that a sample has been assigned to the wrong cluster. Based on the below graphics, I decided to cluster my data into four clusters. I selected k=4 because the silhouette score was only slightly lower than k=3, and based on my conversations with HOMER four customer segments fit aligned closely with expected user types. Furthermore, while the silhouette score for k=7 was also similar, I ultimately decided an analysis of seven customer segments would be more appropriate for future analysis.
 
-<img src="img/silhouette/sil_v_clust_KM.png" alt="sil_v_clust" width="450" height="400">
+<img src="img/silhouette/sil_v_clust_KM.png" alt="sil_v_clust" width="400" height="350">
 <!-- ![silhouette_vs_k](img/silhouette/sil_v_clust_KM.png) -->
 
-After selecting the appropriate number of clusters I fitted the KModes clustering algorithm to the data and assigned cluster labels to each simulation. I then performed exploratory data analysis to begin extracting meaningful business intelligence from the clusters.
+After selecting the appropriate number of clusters, I fitted the KModes clustering algorithm to the data and assigned cluster labels to each simulation. I then performed exploratory data analysis to begin extracting meaningful business intelligence from the clusters.
 
 #### Exploratory Data Analysis
 Before examining each cluster, I gathered a baseline understanding of the user make-up of the simulations. The breakdown of simulations by user type is shown below.
@@ -62,7 +62,7 @@ Service    | 16545|  2.08
 
 After assigning cluster labels to each user using KModes, we can see that the total number of simulations is fairly well distributed among the four clusters, with a larger share going to Cluster 1 and a smaller share to Cluster 2.
 
-<img src="img/cluster_counts.png" alt="cluster_counts" width="400" height="200">
+<img src="img/cluster_counts.png" alt="cluster_counts" width="350" height="175">
 <!-- ![cluster_counts](img/cluster_counts.png) -->
 
 Looking at the distribution of user roles in each cluster, we can see that the model has split the user roles into particular clusters, but not exclusively into just one. Academic users are the majority it in Clusters 1 and 4, and technical users are more prevalent Clusters 2 and 3.
@@ -88,7 +88,7 @@ mean |    14.61|     5.42|    11.23|    11.06
 std  |    73.40|    35.28|    65.24|    50.44
 max  |  3831.00|  1512.00|  3621.00|  2276.00
 
-Other important input variables identified by HOMER are whether a user has imported her own wind or solar location metrics, and whether a user opts to use HOMER's default sample file. The act of importing more precise weather data is viewed favorably in regards to the user's seriousness of turning a simulation into a real project. Similarly, HOMER does not consider a simulation run using its default sample file to correlate with project realness.  
+Other important input variables identified by HOMER are whether a user has imported his/her own wind or solar location metrics, and whether a user opts to use HOMER's default sample file. The act of importing more precise weather data is viewed favorably in regards to the user's seriousness of turning a simulation into a real project. Similarly, HOMER does not consider a simulation run using its default sample file to correlate with project realness.  
 
 The below bar graphs show the mean feature usage for imported solar, imported wind, and sample file in each cluster. For imported wind, we see that Cluster 2 simulations are the most likely to import this data, with just over 10 percent of simulations using imported wind data. For imported solar, all four clusters have a similar mean average for importing geographic-specific data. Interestingly enough, Clusters 2 and 3, the groups with the greatest proportion of technical users, have the highest average for using HOMER's sample file to run simulations. While HOMER considers the use of the sample file to be a negative indicator of simulation realness, it should be noted the relative usage in these clusters is still low at 1.25 and 1.75 percent of the time, respectfully.
 
@@ -97,8 +97,7 @@ The below bar graphs show the mean feature usage for imported solar, imported wi
 
 HOMER also considers the extent to which a simulation models a variety of microgrid parameters and configurations as a strong indicator of the simulation's realness. For each simulation, a user is able to specify what energy hardware (e.g. batteries, turbines, solar panels, etc.) she would like to model, as well a range of hardware specifications for the software to compare and output an optimized microgrid (optimization is defined by the the lowest net present cost of microgrid system). Per conversations with HOMER, a rough metric to judge a simulation's realness is whether the user provides more than two different hardware specifications to test. For this reason, I crafted a series of features that check whether a user modeled a certain piece of hardware, and if so, if the simulation tested multiple specifications/capacities for that particular hardware category.
 
-For generators, the breakdown of simulations that modeled generators, and if more than two generator sizes were tested is as follows.
-
+For generators, the breakdown of simulations that modeled generators, and if more than two generator sizes were tested is as follows:
 **Key:**  
 True = generator modeled and more than two sizes tested   
 False = generator modeled, but less than two sizes tested  
@@ -142,31 +141,30 @@ True |           31383|            11.44|            3688|             3.63|    
 False|          229500|            83.67|           12524|            12.32|           52750|            25.04|          138527|            66.73
 NA   |           13420|             4.89|           85443|            84.05|            6887|             3.27|           30103|            14.50
 
-### Cluster Profiles
+##### Cluster Profiles
 
-[table of icons]
+The below table provides an overview of general characteristics observed in each of the four clusters.
 
-### Plotting Simulations
+<img src="img/icons/cluster_icon_table.jpg" alt="icon_table" width="450" height="275">
+
+### Mapping Simulations
+
+Please see the [web application](http://ec2-52-200-8-2.compute-1.amazonaws.com:8105/#) developed for this project to create a county-by-county heatmap of the United States and marker cluster map of any country in the world for each of the four clusters.
 
 ### Next Steps
 Segmenting simulation runs is an important first step in understanding who is using HOMER's software and where its partners can best focus their marketing and outreach. A close look at the four clusters illuminates distinct characteristics that suggest a varying degree of seriousness or interest from the user. While this information can be immediately helpful in targeting the right users, further exploration and model tuning will certainly add value and precision to determining the realness of a simulated project. Below are a few suggestions of ways to expand upon the findings of this project:   
-- A review of feature importance would like result in new or adjusted model variables that could lead to more robust clustering. Furthermore, applying a heuristic weight to each simulation and exploring graph theory to model pairwise relationships between observations is a possible way to arrive at a 'realness' metric.
+- A review of feature importance would likely result in new or adjusted model variables that could lead to more robust clustering. Furthermore, applying a heuristic weight to each simulation and exploring graph theory to model pairwise relationships between observations is a possible way to arrive at a 'realness' metric.
 - The project currently aggregates three years of software simulations. Exploring ways to incorporate methods that further slice the data and outcomes into time segments would likely prove useful to better understand the relevancy and timeliness of simulations.
-- It is recommended that HOMER begin surveying its software users to learn the intensions and outcomes of the simulations. With this new data HOMER can begin to explore powerful predictive models that will present internal and external analytical opportunities.
+- It is recommended that HOMER begin surveying its software users to learn the intentions and outcomes of the simulations. With this new data HOMER can begin to explore powerful predictive models that will present internal and external analytical opportunities.
+- While mapping the various cluster simulations in different countries, it was observed that repeated simulations were often run close to airports. This behavior makes sense given the need for all airports to maintain constant connectivity. It is recommended that HOMER and/or its supply partners explore direct marketing to airports who through multiple simulations have shown interest in establishing supplemental energy resources or standalone microgrids.
 
 ### Technology Stack
 The following software packages and technologies were used in this project.
 
-<img src="img/techstack.png" alt="techstack" width="350" height="400">
+<img src="img/techstack.png" alt="techstack" width="350" height="375">
 <!-- ![tech_stack](img/techstack.png) -->
 
-### Contact
-Please contact me with questions or comments at <sdking49@gmail.com>.
-
-### Web Application
-You can also explore the flask application for this project [here](http://ec2-52-200-8-2.compute-1.amazonaws.com:8105/#).
-
-### Project Outline
+### Project Development Outline
 Phase 1: Problem Framing - Complete
 - Meet and consult with HOMER Energy counterpart
 - Identify need
@@ -197,9 +195,12 @@ Phase 5: Web Application and Presentation - Current
 - Present findings and application at Galvanize and HOMER Energy
 - Outline next steps
 
-### References
-Academic article on the extension of the k-means algorithm to categorical data:  
-http://arbor.ee.ntu.edu.tw/~chyun/dmpaper/huanet98.pdf  
+### Contact
+Please contact me with questions or comments at <sdking49@gmail.com>.
 
-Python implementation of k-modes and k-prototypes clustering algorithms for categorical data:  
-https://github.com/nicodv/kmodes#id1
+### Web Application
+You can also explore the flask application for this project [here](http://ec2-52-200-8-2.compute-1.amazonaws.com:8105/#).
+
+### References
+Python implementation of KModes clustering algorithm for categorical data: https://github.com/nicodv/kmodes#id1  
+HOMER Energy: http://homerenergy.com/
