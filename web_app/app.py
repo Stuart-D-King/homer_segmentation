@@ -100,7 +100,7 @@ def choropleth_map(cluster=0):
     m.save('templates/choro_map.html')
 
 def marker_cluster_map(df, country, c_num):
-    '''Create a marker cluster map of simulations for a cluster in a pre-defined country'''
+    '''Create a marker cluster map of simulations for a cluster in the specified country'''
     df = df[df['Country'] == country]
     if c_num != 0:
         df = df[df['Cluster'] == c_num]
