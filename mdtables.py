@@ -1,6 +1,7 @@
-import pytablewriter
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytablewriter
+
 
 def user_counts(df):
     grps = df.UserRole.value_counts(dropna=False)
@@ -61,9 +62,9 @@ def usersims_by_cluster(df):
     return output
 
 def write_mdtable(df):
+    '''Convert pandas dataframe to markdown'''
     writer = pytablewriter.MarkdownTableWriter()
     writer.table_name = "example_table"
-
     writer.header_list = ['Index', 'Cluster 1: Count', 'Cluster 1: Total%', 'Cluster 2: Count', 'Cluster 2: Total%', 'Cluster 3: Count', 'Cluster 3: Total%', 'Cluster 4: Count', 'Cluster 4: Total%']
     df.reset_index(level=0, inplace=True)
     # writer.header_list = df.columns.tolist()
@@ -73,7 +74,6 @@ def write_mdtable(df):
 
 if __name__ == '__main__':
     df = pd.read_pickle('data/df_clustered.pkl')
-
     C1, C2, C3, C4 = df[df['Cluster'] == 1], df[df['Cluster'] == 2], df[df['Cluster'] == 3], df[df['Cluster'] == 4]
 
     # user = user_counts(df)
@@ -83,5 +83,4 @@ if __name__ == '__main__':
     search_bat = search_space_counts('MultiBatSearch')
     search_con = search_space_counts('MultiConSearch')
     search_wind = search_space_counts('MultiWindSearch')
-
     # sims_by_cluster = usersims_by_cluster(df)

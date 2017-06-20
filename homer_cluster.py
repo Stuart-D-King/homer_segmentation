@@ -1,16 +1,17 @@
-import numpy as np
-import pandas as pd
-from kmodes import kmodes, kprototypes
-from sklearn.preprocessing import scale, LabelEncoder, OneHotEncoder
-from sklearn.decomposition import PCA
+import pdb
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-import mca
-from sklearn.cluster import KMeans, AgglomerativeClustering
-from sklearn.mixture import GaussianMixture
-from sklearn.manifold import TSNE
+import numpy as np
+import pandas as pd
 import pickle
-import pdb
+from sklearn.cluster import KMeans, AgglomerativeClustering
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+from sklearn.mixture import GaussianMixture
+from sklearn.preprocessing import scale, LabelEncoder, OneHotEncoder
+from kmodes import kmodes, kprototypes
+import mca
+
 
 def one_hot(df_):
     '''
@@ -20,7 +21,6 @@ def one_hot(df_):
     :returns: encoded numpy array
     '''
     df = df_.copy()
-
     cols_to_keep = ['UserRole',
                     'OrganizationType',
                     'MultiGenSearch',
@@ -35,15 +35,14 @@ def one_hot(df_):
                     ]
 
     df = df[cols_to_keep]
-
     le = LabelEncoder()
     enc_dct = dict()
     cat_cols = []
+
     for col in df.columns:
         if df[col].dtype == object:
             idx = df.columns.get_loc(col)
             cat_cols.append(idx)
-
             df[col] = le.fit_transform(df[col])
             enc_dct[col] = le
 
@@ -52,6 +51,7 @@ def one_hot(df_):
     X = enc.fit_transform(X)
 
     return X
+
 
 def run_mca(X):
     '''
@@ -64,6 +64,7 @@ def run_mca(X):
     X = mca_ben.fs_r(1)
     return mca_ben, X
 
+
 def run_tsne(X):
     '''
     Perform TSNE on input array.
@@ -74,6 +75,7 @@ def run_tsne(X):
     model = TSNE(n_components=6, method='exact', random_state=0)
     X = model.fit_transform(X)
     return X
+
 
 def run_pca(X):
     '''
@@ -86,6 +88,7 @@ def run_pca(X):
     X_transformed = pca.fit_transform(X)
     return pca, X_transformed
 
+
 def prep_kproto(df_):
     '''
     Prepare input dataframe for k-prototypes clustering.
@@ -94,7 +97,6 @@ def prep_kproto(df_):
     :returns: list of index position of categorical variables, prepared dataframe
     '''
     df = df_.copy()
-
     cols_to_keep = ['NumSims',
                     'UserRole',
                     'OrganizationType',
@@ -108,9 +110,7 @@ def prep_kproto(df_):
                     'ImportedWind',
                     'ImportedSolar'
                     ]
-
     df = df[cols_to_keep]
-
     # convert 1/0 int columns to boolen type
     bool_cols = ['ImportedWind', 'ImportedSolar', 'Sample']
 
@@ -130,6 +130,7 @@ def prep_kproto(df_):
 
     return cat_cols, df
 
+
 def prep_kmodes(df_):
     '''
     Prepare input dataframe for k-modes clustering.
@@ -138,7 +139,6 @@ def prep_kmodes(df_):
     :returns: prepared dataframe
     '''
     df = df_.copy()
-
     cols_to_keep = ['UserRole',
                     'OrganizationType',
                     'MultiGenSearch',
@@ -151,17 +151,17 @@ def prep_kmodes(df_):
                     'ImportedWind',
                     'ImportedSolar'
                     ]
-
     df = df[cols_to_keep]
-
     le = LabelEncoder()
     enc_dct = dict()
+
     for col in df.columns:
         if df[col].dtype == object:
             df[col] = le.fit_transform(df[col])
             enc_dct[col] = le
 
     return df
+
 
 def run_kproto(X, cat_cols, init_method='Cao', n_clusters=4):
     '''
@@ -177,6 +177,7 @@ def run_kproto(X, cat_cols, init_method='Cao', n_clusters=4):
     labels = kp.fit_predict(X, categorical=cat_cols)
     return kp, labels
 
+
 def run_kmodes(X, init_method='Huang', n_clusters=4):
     '''
     Perform k-modes clustering.
@@ -190,6 +191,7 @@ def run_kmodes(X, init_method='Huang', n_clusters=4):
     labels = km.fit_predict(X)
     return km, labels
 
+
 def plot_clusters(X, labels, n_clusters=4):
     '''
     Plot a 2-D representation of clusters.
@@ -201,10 +203,9 @@ def plot_clusters(X, labels, n_clusters=4):
     '''
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot(111)
-
     colors = cm.spectral(labels.astype(float) / n_clusters)
-    ax.scatter(X[:, 0], X[:, 1], marker='.', s=30, lw=0, alpha=0.7, c=colors)
 
+    ax.scatter(X[:, 0], X[:, 1], marker='.', s=30, lw=0, alpha=0.7, c=colors)
     plt.savefig('img/plotted_clusters.png'.format(n_clusters), dpi=200)
     plt.close()
 
@@ -239,7 +240,7 @@ if __name__ == '__main__':
     # df_users_clustered = pd.read_pickle('data/df_users_clustered.pkl')
 
 
-    # EXTRA STUFF
+    # NOT USED
     # ---One Hot Encode---
     # X_users = one_hot(df_users)
 

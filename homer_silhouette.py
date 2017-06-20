@@ -1,13 +1,13 @@
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-from sklearn.metrics import silhouette_samples, silhouette_score
-from kmodes import kmodes, kprototypes
-from sklearn.cluster import KMeans, AgglomerativeClustering
-from sklearn.mixture import GaussianMixture
-from homer_cluster import one_hot, prep_kmodes
 import pdb
+import matplotlib.cm as cm
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from sklearn.cluster import KMeans, AgglomerativeClustering
+from sklearn.metrics import silhouette_samples, silhouette_score
+from sklearn.mixture import GaussianMixture
+from kmodes import kmodes, kprototypes
+from homer_cluster import one_hot, prep_kmodes
 
 
 def plot_silhouette(df, X, n_clusters, model='KM'):
@@ -22,7 +22,6 @@ def plot_silhouette(df, X, n_clusters, model='KM'):
     '''
     fig = plt.figure(figsize=(8,6))
     ax = fig.add_subplot(111)
-
     ax.set_xlim([-0.6, 1])
     # Insert blank space between silhouette plots of individual clusters
     ax.set_ylim([0, len(df) + (n_clusters + 1) * 10])
@@ -79,6 +78,7 @@ def plot_silhouette(df, X, n_clusters, model='KM'):
     plt.savefig('sil_{}_{}.png'.format(clusterer.__class__.__name__, n_clusters), dpi=200)
     plt.close()
 
+
 def get_silhouette_score(df, X, n_clusters, model='KM'):
     '''
     Calculate silhouette score for clustered dataframe.
@@ -107,6 +107,7 @@ def get_silhouette_score(df, X, n_clusters, model='KM'):
 
     return sil_avg
 
+
 def plot_sil_scores(df, X, model):
     '''
     Plot silhouette scores for cluster models based on the number of clusters for each model.
@@ -117,8 +118,8 @@ def plot_sil_scores(df, X, model):
     '''
     fig = plt.figure(figsize=(8,6))
     ax = fig.add_subplot(111)
-
     sil_scores = [get_silhouette_score(df, X, i, model) for i in range(2,9)]
+
     ax.plot(range(2,9), sil_scores)
     ax.set_xlabel('Number of Clusters')
     ax.set_ylabel('Silhouette Score')
