@@ -26,12 +26,13 @@
     <!-- Custom styles for this template -->
     <link href="../static/css/carousel.css" rel="stylesheet">
 
+    <meta name=viewport content='width=700'>
 
     <style>
     table {
     font-family: arial, sans-serif;
     width: 70%;
-    margin: 15px;
+    margin: 10px;
     }
 
     td, th {
@@ -50,7 +51,7 @@
         border-collapse: collapse;
         text-align:left;
         padding: 8px;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
         /*font-size: 0.9em;*/
         width: auto;
       }
@@ -110,7 +111,7 @@
               <h1>Microgrid Customer Segmentation</h1>
               <p>A research project in collaboration with HOMER Energy using clustering techniques to segment customers and gather business intelligence.</p>
               <p>HOMER Energy is a world leader in accurately modeling microgrid optimization, helping clients build cost effective and reliable microgrids that combine traditionally generated and renewable power, storage, and load management.</p>
-              <p><a class="btn btn-lg btn-primary" href="http://www.homerenergy.com/" target="_blank" role="button">Check out HOMER</a></p>
+              <!-- <p><a class="btn btn-lg btn-primary" href="http://www.homerenergy.com/" target="_blank" role="button">Check out HOMER</a></p> -->
             </div>
           </div>
         </div>
@@ -129,7 +130,7 @@
       <div class="row">
         <div class="col-lg-4">
           <a href="#overview">
-          <i class="fa fa-compass" style="font-size:80px" aria-hidden="true"></i>
+          <i class="fa fa-compass" style="font-size:60px" aria-hidden="true"></i>
           </a>
           <h2>Project Overview</h2>
           <p>Understand the genesis of this project and how the model was developed.</p>
@@ -137,7 +138,7 @@
         </div><!-- /.col-lg-4 -->
         <div class="col-lg-4">
           <a href="#mapcreator">
-          <i class="fa fa-globe" style="font-size:80px" aria-hidden="true"></i>
+          <i class="fa fa-globe" style="font-size:60px" aria-hidden="true"></i>
           </a>
           <h2>Maps!</h2>
           <p>Create a heatmap of simulations in the United States or marker cluster map of any country in the world. Get. Excited.</p>
@@ -145,7 +146,7 @@
         </div><!-- /.col-lg-4 -->
         <div class="col-lg-4">
           <a href="#techstack">
-          <i class="fa fa-cogs" style="font-size:80px" aria-hidden="true"></i>
+          <i class="fa fa-cogs" style="font-size:60px" aria-hidden="true"></i>
           </a>
           <h2>Technology Stack</h2>
           <p>Find out what technologies and software packages were used to create this project.</p>
@@ -270,7 +271,7 @@
       </div>
 
       <div class="container">
-        <img src="../static/img/sil_v_clust_KM.png" style="float: left; width: 49%; margin-right: 1%; margin-bottom: 0.5em;">
+        <img src="../static/img/sil_v_clust_KM.png" style="float:left; width: 400px; margin-right: 1%; margin-bottom: 0.5em;">
       </div>
 
       <div class="container">
@@ -296,28 +297,28 @@
         <div>
           After assigning cluster labels to each user using k-modes, we can see that the total number of simulations is fairly well distributed among the four clusters, with a larger share going to Cluster 1 and a smaller share to Cluster 2.</p>
           <div class="container">
-            <img src="../static/img/cluster_counts.png" style="float: left; width: 50%; margin-right: 0%; margin-bottom: 0.5em;">
+            <img src="../static/img/cluster_counts.png" style="float: left; width: 400px; margin-right: 0%; margin-bottom: 0.5em;">
           </div>
         </div>
 
           <div>
             <p>Looking at the distribution of user roles in each cluster, we can see that the model has split the user roles into particular clusters, but not exclusively into just one. Academic users are the majority it in Clusters 1 and 4, and technical users are more prevalent Clusters 2 and 3.</p>
             <div class="container">
-              <img src="../static/img/sims_by_cluster_user.png" style="float: left; width: 70%; margin-right: 0%; margin-bottom: 0.5em;">
+              <img src="../static/img/sims_by_cluster_user.png" style="float: left; width: 500px; margin-right: 0%; margin-bottom: 0.5em;">
             </div>
           </div>
 
           <div>
             <p>Similarly, the distribution of organization type among the clusters aligns closely with the user role distributions. Academic institutions are the majority in Clusters 1 and 4, and engineering firms are most common in Clusters 2 and 3.</p>
             <div class="container">
-              <img src="../static/img/sims_by_cluster_org.png" style="float: left; width: 70%; margin-right: 0%; margin-bottom: 0.5em;">
+              <img src="../static/img/sims_by_cluster_org.png" style="float: left; width: 500px; margin-right: 0%; margin-bottom: 0.5em;">
             </div>
           </div>
 
           <div>
             <p>To explore and extract additional information from the data, I also created weekday and weekend histograms of the number of simulations per day for each cluster. The resultant graphs suggest similar, but subtle differences between the four groups. While the number of simulations per day is on average highest during the week for all four clusters, we can see from the histograms for Cluster 1 that the frequency of simulations on the weekend does not differ as severely as compared to the other three groups. This could be due to the fact that there is large majority of academic users in this cluster, and students are more likely to run simulations over the weekend for school projects. Building on this analysis, Cluster 4, which also has a majority of academic users and organizations, appears to have relatively high kurtosis due to a few extreme deviations (outliers). While the weekend simulations seem to be infrequent in Cluster 4, there are a handful of days in which the cumulative sum of simulations have reached into the thousands. The true nature of these simulations likely requires further analysis to determine if the simulations are being run with project implementation in mind, or as part of academic research endeavor. Clusters 2 and 3 also suggest minimal weekend software usage, with Cluster 3 depicting a distribution suggestive of more model runs per day.
             <div class="container">
-              <img src="../static/img/weekday_weekend.png" style="float: left; width: 60%; margin-right: 0%; margin-bottom: 0.5em;">
+              <img src="../static/img/weekday_weekend.png" style="float: left; width: 500px; margin-right: 0%; margin-bottom: 0.5em;">
             </div>
           </div>
 
@@ -330,7 +331,7 @@
             <p>Other important input variables identified by HOMER are whether a user has imported her own wind or solar location metrics, and whether a user opts to use HOMER's default sample file. The act of importing more precise weather data is viewed favorably in regards to the user's seriousness of turning a simulation into a real project. Similarly, HOMER does not consider a simulation run using its default sample file to correlate with project realness.</p>
             <p>The below bar graphs show the mean feature usage for imported solar, imported wind, and sample file in each cluster. For imported wind, we see that Cluster 2 simulations are the most likely to import this data, with just over 10 percent of simulations using imported wind data. For imported solar, all four clusters have a similar mean average for importing geographic-specific data. Interestingly enough, Clusters 2 and 3, the groups with the greatest proportion of technical users, have the highest average for using HOMER's sample file to run simulations. While HOMER considers the use of the sample file to be a negative indicator of simulation realness, it should be noted the relative usage in these clusters is still low at 1.25 and 1.75 percent of the time, respectfully.
             <div class="container">
-              <img src="../static/img/imports.png" style="float: left; width: 75%; margin-right: 0%; margin-bottom: 0.5em;">
+              <img src="../static/img/imports.png" style="float: left; width: 500px; margin-right: 0%; margin-bottom: 0.5em;">
             </div>
 
           <div>
@@ -710,11 +711,11 @@
 
     <section id="techstack">
       <div class="container">
-        <div class="col-lg-8 col-lg-offset-2 text-center">
+        <div class="col-lg-8">
           <h2 class="section-heading">Technology Stack</h2>
           <a href="#">Back to top</a>
           <p class="lead">The following software packages and technologies were used in this project.</p>
-          <img src="../static/img/techstack.png" alt="" style="width:700px;height:700px";>
+          <img src="../static/img/techstack.png" alt="" style="width:600px;height:600px";>
         </div>
       </div>
     </section>
@@ -723,7 +724,7 @@
 
     <section id="contact">
       <div class="container">
-        <div class="col-lg-8 col-lg-offset-2 text-center">
+        <div class="col-lg-8">
           <h2 class="section-heading">Contact Me</h2>
           <p class="lead">Please contact me with questions or comments. You can also check out my GitHub repo for a more in-depth look at the code developed for this project.</p>
         </div>
