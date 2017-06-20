@@ -261,12 +261,12 @@
 
       <div class="container">
         <h4>Model Development</h4>
-        <p>Because HOMER does not currently have a way of tracking which of its software users have become microgrid implementers, I explored various unsupervised clustering algorithms to model the underlying structure of the data. KMeans is a common clustering algorithm that groups data according to existing similarities. However, because the similarity metric used in KMeans is the computed euclidean distance between each data point and the centroids of each cluster, the KMeans algorithm is not appropriate for non-numerical data. A more appropriate clustering algorithm is KModes. KModes is an extension of KMeans, however, instead of calculating distance, it quantifies the total number of mismatched categories between two objects: the small the number, the more similar the two objects. In addition, KModes uses modes instead of means, in which the mode is a vector of elements that minimizes the dissimilarities between the vector and an individual data point.</p>
-        <p>Other unsupervised clustering algorithms were also tested on the data, including hierarchical agglomerative clustering and gaussian mixture models. To test these algorithms, I used one-hot encoding to further transform the feature space into binary/dummy variables. Both algorithms produced clustered results, however, the interpretability of the clusters was compromised due to the inherent non-numerical nature of the data. For this reason, I settled on KModes as the algorithm to formulate my findings. For a deep dive into KModes clustering, check out Zhexue Huang's excellent <a href="http://arbor.ee.ntu.edu.tw/~chyun/dmpaper/huanet98.pdf">research paper</a> on the topic.</p>
+        <p>Because HOMER does not currently have a way of tracking which of its software users have become microgrid implementers, I explored various unsupervised clustering algorithms to model the underlying structure of the data. K-means is a common clustering algorithm that groups data according to existing similarities. However, because the similarity metric used in k-means is the computed euclidean distance between each data point and the centroids of each cluster, the k-means algorithm is not appropriate for non-numerical data. A more appropriate clustering algorithm is k-modes. K-modes is an extension of k-means, however, instead of calculating distance, it quantifies the total number of mismatched categories between two objects: the small the number, the more similar the two objects. In addition, k-modes uses modes instead of means, in which the mode is a vector of elements that minimizes the dissimilarities between the vector and an individual data point.</p>
+        <p>Other unsupervised clustering algorithms were also tested on the data, including hierarchical agglomerative clustering and gaussian mixture models. To test these algorithms, I used one-hot encoding to further transform the feature space into binary/dummy variables. Both algorithms produced clustered results, however, the interpretability of the clusters was compromised due to the inherent non-numerical nature of the data. For this reason, I settled on k-modes as the algorithm to formulate my findings. For a deep dive into k-modes clustering, check out Zhexue Huang's excellent <a href="http://arbor.ee.ntu.edu.tw/~chyun/dmpaper/huanet98.pdf" target="_blank">research paper</a> on the topic.</p>
       </div>
 
       <div class="container">
-        <p>Once the cluster algorithm was selected, I needed to determine the appropriate amount of clusters to segment the data. In KMeans clustering, it is common to perform a dimensionality reduction technique such as principle component analysis (PCA) to plot the resulting clusters in a two dimensional space to visually confirm clustering is taking place. However, because applying PCA to categorical data is generally regarded as unwise, I instead opted to calcuate a silhouette score for different numbers of clusters based on a hamming distance metric to settle on the most appropriate number of customer segments. When calcuating the silhouette coefficient, the best possible value is 1, indicating all data points are perfected grouped and there are no overlapping clusters. A coefficient of 0 implies overlapping clusters, and negative values suggest that a sample has been assigned to the wrong cluster. Based on the below plot of scores, I decided to cluster my data into four clusters. I selected k=4 because the silhouette score was the highest for this number of clusters, and it made intuitive sense based on my understanding of HOMER's customer base.</p>
+        <p>Once the cluster algorithm was selected, I needed to determine the appropriate amount of clusters to segment the data. In k-means clustering, it is common to perform a dimensionality reduction technique such as principle component analysis (PCA) to plot the resulting clusters in a two dimensional space to visually confirm clustering is taking place. However, because applying PCA to categorical data is generally regarded as unwise, I instead opted to calcuate a silhouette score for different numbers of clusters based on a hamming distance metric to settle on the most appropriate number of customer segments. When calculating the silhouette coefficient, the best possible value is 1, indicating all data points are perfectly grouped and there are no overlapping clusters. A coefficient of 0 implies overlapping clusters, and negative values suggest that a sample has been assigned to the wrong cluster. Based on the below plot of scores, I decided to cluster my data into four clusters. I selected k=4 because the silhouette score was the highest for this number of clusters, and it made intuitive sense based on my understanding of HOMER's customer base.</p>
       </div>
 
       <div class="container">
@@ -274,7 +274,7 @@
       </div>
 
       <div class="container">
-        <p>After selecting the appropriate number of clusters, I fitted the KModes clustering algorithm to the data and assigned cluster labels to each simulation. I then performed exploratory data analysis to begin extracting meaningful business intelligence from the clusters.</p>
+        <p>After selecting the appropriate number of clusters, I fitted the k-modes clustering algorithm to the data and assigned cluster labels to each simulation. I then performed exploratory data analysis to begin extracting meaningful business intelligence from the clusters.</p>
       </div>
     </section>
 
@@ -294,7 +294,7 @@
         </div>
 
         <div>
-          After assigning cluster labels to each user using KModes, we can see that the total number of simulations is fairly well distributed among the four clusters, with a larger share going to Cluster 1 and a smaller share to Cluster 2.</p>
+          After assigning cluster labels to each user using k-modes, we can see that the total number of simulations is fairly well distributed among the four clusters, with a larger share going to Cluster 1 and a smaller share to Cluster 2.</p>
           <div class="container">
             <img src="../static/img/cluster_counts.png" style="float: left; width: 50%; margin-right: 0%; margin-bottom: 0.5em;">
           </div>
@@ -404,7 +404,7 @@
         <a href="#">Back to top</a>
         <h4>Make a choropleth map of the number of software simulations by county and cluster in the United States</h4>
         <p>Which cluster do you want to map? Select <b>"All"</b> from the drop down list if you want to map all clusters.</p>
-        <form action='/show_choro_map' target="_blank" method='POST' id='submitform'>
+        <form action='/choro_map' target="_blank" method='POST' id='submitform'>
           <select name="input_num_choro">
             <option value="1">1 - Students / Weekend Warriors</option>
             <option value="2">2 - Professionals</option>
@@ -421,7 +421,7 @@
       <div class="container">
         <h2>Marker Cluster Map Creator</h2>
         <h4>Make a marker cluster map of the number of software simulations by country and cluster</h4>
-        <form action='/show_marker_map' target="_blank" method='POST' id='submitform'>
+        <form action='/marker_map' target="_blank" method='POST' id='submitform'>
           <p>Select a country:</p>
           <select name="input_country">
           	<option value="AF">Afghanistan</option>

@@ -17,9 +17,10 @@ def bar_charts(df):
     for ax, col in zip(axes.ravel(), cols):
         grp = df.groupby('Cluster')[col].mean()
         ax.bar(clusters, grp, alpha=0.4, color='b')
-        ax.set_xlabel('Cluster')
-        ax.set_ylabel('Average ({})'.format(col))
+        ax.set_xlabel('')
+        ax.set_ylabel('Average ({})'.format(col), fontsize=16)
         ax.set_xticks(range(1, 5))
+        ax.tick_params(labelsize=14)
         ax.axhline(y=np.mean(df[col]), color='red', linestyle='--')
 
     fig.tight_layout()
@@ -53,7 +54,11 @@ def count_sims_cluster(df):
     fig = plt.figure(figsize=(8,4))
     ax = fig.add_subplot(111)
     sns.countplot(y='Cluster', data=df, ax=ax, color="c")
-    plt.title('Number of Simulations per Cluster', fontsize=14)
+
+    ax.set_xlabel('Count', fontsize=14)
+    ax.set_ylabel('Cluster', fontsize=14)
+    ax.tick_params(labelsize=14)
+    plt.title('Number of Simulations per Cluster', fontsize=20)
 
     plt.tight_layout()
     plt.savefig('img/cluster_counts.png', dpi=200)
@@ -64,7 +69,7 @@ def count_user_cluster(df):
     ax = fig.add_subplot(111)
     sns.countplot(x='Cluster', hue='UserRole', data=df, palette="Greens_d", ax=ax)
 
-    plt.title('Number of Simulations by Cluster and User Role', fontsize=14)
+    plt.title('Number of Simulations by Cluster and User Role', fontsize=20)
     plt.show()
 
 def hist_sims(df):
@@ -149,12 +154,14 @@ def cluster_bars_org(df):
     fig, ax = plt.subplots(1, 1, figsize=(10, 4))
     agg.plot(kind='bar', ax=ax).set_ylabel('Simulations')
 
-    plt.title('Number of Simulations by Cluster and Organization Type', fontsize=14)
+    # ax.set_yticklabels(ax.get_yticklabels(), fontsize=14)
+
+    plt.title('Number of Simulations by Cluster and Organization Type', fontsize=16)
 
     plt.xticks(rotation='horizontal')
-    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
-          fancybox=True, shadow=True, ncol=6)
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, shadow=True, ncol=6)
 
+    # ax.tick_params(labelsize=14)
     ax.set_xlabel('')
     plt.savefig('img/sims_by_cluster_org.png', dpi=200)
     plt.close()
@@ -163,17 +170,19 @@ def cluster_bars_user(df):
     # categorical vs categorical vs numeric
     agg = df.groupby(['Cluster', 'UserRole'])['UserRole'].count()
     agg = agg.unstack(level='UserRole')
-    fig, ax = plt.subplots(1, 1, figsize=(10, 4))
-    agg.plot(kind='bar', ax=ax).set_ylabel('Simulations')
+    fig, ax = plt.subplots(1, 1, figsize=(10, 5))
+    agg.plot(kind='bar', ax=ax).set_ylabel('Simulations', fontsize=20)
 
-    plt.title('Number of Simulations by Cluster and User Role', fontsize=14)
+    plt.title('Number of Simulations by Cluster and User Role', fontsize=24)
 
+    ax.tick_params(labelsize=20)
     plt.xticks(rotation='horizontal')
-    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
-          fancybox=True, shadow=True, ncol=4)
+    # ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fontsize=16, fancybox=True, shadow=True, ncol=4)
 
     ax.set_xlabel('')
-    plt.savefig('img/sims_by_cluster_user.png', dpi=200)
+    plt.legend(loc='best', fontsize=18)
+    plt.tight_layout()
+    plt.savefig('img/sims_by_cluster_user.png', dpi=600)
     plt.close()
 
 def marker_map(df, c_num=0):
@@ -274,5 +283,5 @@ if __name__ == '__main__':
     # weekday_weekend(df)
     # choropleth_map(df_usa)
     # marker_cluster_map(df, 'DE', 2)
-    # cluster_bars_user(df)
+    cluster_bars_user(df)
     # cluster_bars_org(df)

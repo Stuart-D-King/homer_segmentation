@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, send_file
 import pandas as pd
+import numpy as np
 import folium
 app = Flask(__name__)
 
@@ -75,6 +76,9 @@ def choropleth_map(cluster=0):
     simsdata = simsdata.reset_index()
     simsdata.columns = ['ID', 'Number']
 
+    simsrange = np.max(simsdata['Number']) - np.min(simsdata['Number'])
+    threshold_scale = [np.min(simsdata['Number']), simsrange*.2, simsrange*.4, simsrange*.6, simsrange*.8, np.max(simsdata['Number'])]
+
     county_geo = r'../data/us_counties_20m_topo.json'
 
     m = folium.Map(location=[48, -99], zoom_start=4)
@@ -82,13 +86,15 @@ def choropleth_map(cluster=0):
                     data=simsdata,
                     columns=['ID', 'Number'],
                     key_on='feature.id',
+                    threshold_scale=threshold_scale,
                     fill_color='PuRd',
                     fill_opacity=0.7,
                     line_opacity=0.3,
                     legend_name='Number of Simulations',
                     topojson='objects.us_counties_20m')
 
-    m.save('static/img/choro_map.html')
+    # m.save('static/img/choro_map.html')
+    m.save('templates/choro_map.html')
 
 def marker_cluster_map(df, country, c_num):
     df = df[df['Country'] == country]
@@ -112,7 +118,8 @@ def marker_cluster_map(df, country, c_num):
     for idx, (lat, lng) in enumerate(lat_lng):
         folium.Marker(location=[lat, lng]).add_to(marker_cluster)
 
-    m.save('static/img/marker_cluster.html')
+    # m.save('static/img/marker_cluster.html')
+    m.save('templates/marker_cluster.html')
 
 def usersims_by_cluster(df):
     pt = pd.pivot_table(df, values=['Created'], index=['User'], columns=['Cluster'], aggfunc='count', fill_value=0)
@@ -143,21 +150,23 @@ def index():
     return render_template('index.html', user_table=user_table, org_table=org_table, df_gen=df_gen, df_wind=df_wind, df_bat=df_bat, df_pv=df_pv, df_con=df_con, sims_by_cluster=sims_by_cluster)
 
 # choro map page
-@app.route('/show_choro_map', methods=['POST'])
+@app.route('/choro_map', methods=['POST'])
 def show_choro_map():
     cluster = int(request.form['input_num_choro'])
     choropleth_map(cluster)
 
-    return send_file('static/img/choro_map.html')
+    return render_template('choro_map.html')
+    # return send_file('static/img/choro_map.html')
 
 # marker map page
-@app.route('/show_marker_map', methods=['POST'])
+@app.route('/marker_map', methods=['POST'])
 def show_marker_map():
     c_num = int(request.form['input_num_marker'])
     country = str(request.form['input_country'])
     marker_cluster_map(df, country, c_num)
 
-    return send_file('static/img/marker_cluster.html')
+    return render_template('marker_cluster.html')
+    # return send_file('static/img/marker_cluster.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8105, threaded=True)
