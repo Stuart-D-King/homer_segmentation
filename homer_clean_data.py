@@ -7,8 +7,14 @@ from collections import defaultdict
 import pdb
 
 def read_data():
+    '''
+    Read in, clean, and prepare data for precessing.
+
+    :param: None
+    :returns: dataframe
+    '''
     # df = pd.read_csv('data/combined_grid_and_run_data.csv', encoding='iso-8859-1')
-    df = pd.read_csv('data/output.csv')
+    df = pd.read_csv('data/all_data.csv')
 
     cols = ['UserRole',
             'OrganizationType',
@@ -44,8 +50,6 @@ def read_data():
     df['UserRole'] = df['UserRole'].replace(['IT Professional', 'IT Staff', 'Sales/Marketing', 'Purchasing Agent', 'Executive', 'Planner/Regulator/Policy Maker'], 'Business')
     df['UserRole'] = df['UserRole'].replace([np.nan, 'Personal Interest', 'Staff', 'Other'], 'NA')
 
-    # df['UserRole'] = df['UserRole'].astype('category')
-
     # clean 'OrganizaitonType'
     df['OrganizationType'] = df['OrganizationType'].replace([np.nan, 'Other', 'Interested Individual', 'Microgrid End User (all types)'], 'NA')
     df['OrganizationType'] = df['OrganizationType'].replace(['Engineering Services Company', 'Electric Distribution Utility', 'Independent Power Producer', 'Project Developer'], 'Engineering')
@@ -54,12 +58,12 @@ def read_data():
     df['OrganizationType'] = df['OrganizationType'].replace(['Academic Institution or Research Center'], 'Academic')
     df['OrganizationType'] = df['OrganizationType'].replace(['Other Professional Services Company', 'Finance Organization'], 'Service')
 
-    # set 'OrganizationType' as category type
-    # df['OrganizationType'] = df['OrganizationType'].astype('category')
-
     print('Creating new columns...')
 
     def f(x):
+        '''
+        Convert categorical variable to numeric: 'NA' --> -1, 'False' --> 0, 'True' --> 1
+        '''
         if x == 'NA':
             val = -1
         elif x == 'False':
@@ -79,7 +83,6 @@ def read_data():
     df['MultiConSearch'] = np.where(df['Converter'].notnull(), df['ConverterSearchSpace'].astype(str).apply(lambda x: x.split('|')).apply(lambda x: len(x) > 2), 'NA')
 
     # create new 'GeneratorDefault' column
-    # df['DefaultGenerator'] = np.where(df['Generator0'] == 'Autosize Genset', True, False)
     df['DefaultGenerator'] = np.where(df['Generator0'].notnull(), np.where(df['Generator0'] == 'Autosize Genset', True, False), 'NA')
 
     # clean 'Sample'; if a sample is used = True, else = False
@@ -105,7 +108,6 @@ def read_data():
     # drop any Users with IDs whose length is not 6
     df = df[df['User'].map(len) == 6]
 
-
     print('Converting booleans to integers...')
     # convert boolean columns to int type
     bool_cols = ['ImportedWind', 'ImportedSolar', 'Sample']
@@ -115,7 +117,9 @@ def read_data():
             df[col] = df[col].astype(bool)
         df[col] = df[col].astype(int)
 
+    # drop nulls
     df.dropna(axis=0, how='any', inplace=True)
+
     # reset dataframe index
     df.reset_index(drop=True, inplace=True)
 
@@ -129,8 +133,6 @@ def create_user_df(df):
     :param df: dataframe to build new dataframe
     :returns: created user dataframe
     '''
-    # df.dropna(axis=0, how='any', inplace=True)
-
     # group by user
     users = df.groupby('User')
     # get number of simulations by user
@@ -167,6 +169,12 @@ def create_user_df(df):
     return df_users
 
 def add_country_codes(df):
+    '''
+    Use latitude and longitude coordinates to determine the country of a project.
+
+    :param df: dataframe with coordinates
+    :returns: dataframe with project country codes appended
+    '''
     latitude = df.Latitude.values
     longitude = df.Longitude.values
 
@@ -188,6 +196,12 @@ def add_country_codes(df):
     return df
 
 def remove_outliers(df_):
+    '''
+    Remove outliers that are 1.5 times above and below the 75th and 25th percentiles.
+
+    :param df_: dataframe from which outliers are to be removed
+    :returns: cleaned dataframe
+    '''
     df = df_.copy()
 
     Q1 = np.percentile(df.loc[:, 'NumSims'], 25)
@@ -204,6 +218,12 @@ def remove_outliers(df_):
     return clean_df
 
 def fips_codes(df):
+    '''
+    Add FIPS codes for U.S. simulations by pinging FCC API.
+
+    :param df: dataframe for which FIPS codes are to be determined
+    :returns: dataframe of U.S. simulations with FIPS codes appended
+    '''
     df = df[df['Country'] == 'US']
     latitude = df.Latitude.values
     longitude = df.Longitude.values
