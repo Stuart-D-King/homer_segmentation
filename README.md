@@ -2,7 +2,7 @@
 ### Problem Statement
 [HOMER Energy](http://www.homerenergy.com/) is a world leader in accurately modeling microgrid optimization. The HOMER (Hybrid Optimization of Multiple Energy Resources) software allows users to understand how to build cost effective and reliable microgrids that combine traditionally generated and renewable power, storage, and load management. HOMER Energy also offers software training, microgrid consulting expertise, and market access support to its vendor partners.
 
-As the microgrid market continues to expand, HOMER and its vendor partners need to better understand its software users' behavior and intentions. The objective of this study is to extract structure and meaning from HOMER Energy's collection of user software simulations. By being able to segment its customer base, HOMER can enhance the market access branch of its business model by providing its vendor partners with more reliable information related to the microgrid consumer market. Understanding which software users are more likely to initiate micogrids is information all vendors want to know to better target those consumers who are ready to get started.
+As the microgrid market continues to expand, HOMER and its vendor partners need to better understand its software users' behavior and intentions. **The objective of this study is to extract structure and meaning from HOMER Energy's collection of user software simulations.** By being able to segment its customer base, HOMER can enhance the market access branch of its business model by providing its vendor partners with more reliable information related to the microgrid consumer market. Understanding which software users are more likely to initiate microgrids is information all vendors want to know to better target those consumers who are ready to get started.
 
 ### Process
 #### Data Preprocessing
@@ -30,7 +30,7 @@ The first step in this process was to understand the data and prepare it for mod
 #### Model Development
 Because HOMER does not currently have a way of tracking which of its software users have become microgrid implementers, I explored various unsupervised clustering algorithms to model the underlying structure of the data. K-means is a common clustering algorithm that groups data according to existing similarities. However, because the similarity metric used in k-means is the computed euclidean distance between each data point and the centroids of each cluster, the k-means algorithm is not appropriate for non-numerical data. A more appropriate clustering algorithm is **k-modes**. K-modes is an extension of k-means, however, instead of calculating distance, it quantifies the total number of mismatched categories between two objects: the small the number, the more similar the two objects. In addition, k-modes uses modes instead of means, in which the mode is a vector of elements that minimizes the dissimilarities between the vector and an individual data point.
 
-Other unsupervised clustering algorithms were also tested on the data, including **hierarchical agglomerative clustering** and **gaussian mixture models**. To test these algorithms, I used one-hot encoding to further transform the feature space into binary/dummy variables. Both algorithms produced clustered results, however, the interpretability of the clusters was compromised due to the inherent non-numerical nature of the data. For this reason, I settled on k-modes as the algorithm to formulate my findings. You can read more about k-modes clustering in Zhexue Huang's research paper on the topic.
+Other unsupervised clustering algorithms were also tested on the data, including **hierarchical agglomerative clustering** and **gaussian mixture models**. To test these algorithms, I used one-hot encoding to further transform the feature space into binary/dummy variables. Both algorithms produced clustered results, however, the interpretability of the clusters was compromised due to the inherent non-numerical nature of the data. For this reason, I settled on k-modes as the algorithm to formulate my findings. You can read more about k-modes clustering in Zhexue Huang's [reasearch paper](http://arbor.ee.ntu.edu.tw/~chyun/dmpaper/huanet98.pdf) on the topic.
 
 Once the cluster algorithm was selected, I needed to determine the appropriate amount of clusters to segment the data. In k-means clustering, it is common to perform a dimensionality reduction technique such as principle component analysis (PCA) to plot the resulting clusters in a two dimensional space to visually confirm clustering is taking place. However, because applying PCA to categorical data is generally regarded as unwise, I instead opted to calculate a silhouette score based on a hamming distance metric for a range of cluster quantities to settle on the most appropriate number of customer segments.  When calculating the silhouette coefficient, the best possible value is 1, indicating all data points are perfectly grouped and there are no overlapping clusters. A coefficient of 0 implies overlapping clusters, and negative values suggest that a sample has been assigned to the wrong cluster. Based on the below plot of scores, I decided to cluster my data into four clusters. I selected k=4 because the silhouette score was the highest for this number of clusters, and it made intuitive sense based on my understanding of HOMER's customer base.
 
@@ -97,7 +97,7 @@ The below bar graphs show the mean feature usage for imported solar, imported wi
 
 HOMER also considers the extent to which a simulation models a variety of microgrid parameters and configurations as a strong indicator of the simulation's realness. For each simulation, a user is able to specify what energy hardware (e.g. batteries, turbines, solar panels, etc.) she would like to model, as well a range of hardware specifications for the software to compare and output an optimized microgrid (optimization is defined by the the lowest net present cost of microgrid system). Per conversations with HOMER, a rough metric to judge a simulation's realness is whether the user provides more than two different hardware specifications to test. For this reason, I crafted a series of features that check whether a user modeled a certain piece of hardware, and if so, if the simulation tested multiple specifications/capacities for that particular hardware category.
 
-For generators, the breakdown of simulations that modeled generators, and if more than two generator sizes were tested is as follows:
+For generators, the breakdown of simulations that modeled generators, and if more than two generator sizes were tested is as follows:  
 **Key:**  
 True = generator modeled and more than two sizes tested   
 False = generator modeled, but less than two sizes tested  
@@ -141,15 +141,15 @@ True |           31383|            11.44|            3688|             3.63|    
 False|          229500|            83.67|           12524|            12.32|           52750|            25.04|          138527|            66.73
 NA   |           13420|             4.89|           85443|            84.05|            6887|             3.27|           30103|            14.50
 
-##### Cluster Profiles
+#### Cluster Profiles
 
 The below table provides an overview of general characteristics observed in each of the four clusters.
 
-<img src="img/icons/cluster_icon_table.jpg" alt="icon_table" width="600" height="350">
+<img src="img/icons/cluster_profiles.png" alt="icon_table" width="600" height="325">
 
 ### Mapping Simulations
 
-Please see the [web application](http://ec2-52-200-8-2.compute-1.amazonaws.com:8105/#) developed for this project to create a county-by-county heatmap of the United States and marker cluster map of any country in the world for each of the four clusters.
+Please see the [web application](http://ec2-52-200-8-2.compute-1.amazonaws.com:8105/#) developed for this project to create a county-by-county heat map of the United States and marker cluster map of any country in the world for each of the four clusters.
 
 ### Next Steps
 Segmenting simulation runs is an important first step in understanding who is using HOMER's software and where its partners can best focus their marketing and outreach. A close look at the four clusters illuminates distinct characteristics that suggest a varying degree of seriousness or interest from the user. While this information can be immediately helpful in targeting the right users, further exploration and model tuning will certainly add value and precision to determining the realness of a simulated project. Below are a few suggestions of ways to expand upon the findings of this project:   
@@ -202,5 +202,7 @@ Please contact me with questions or comments at <sdking49@gmail.com>.
 You can also explore the flask application for this project [here](http://ec2-52-200-8-2.compute-1.amazonaws.com:8105/#).
 
 ### References
-Python implementation of k-modes clustering algorithm for categorical data: https://github.com/nicodv/kmodes#id1  
-HOMER Energy: http://homerenergy.com/
+- “Extensions to the k-Means Algorithm for Clustering Large Data Setswith Categorical Values" by Zhexue Huang:
+http://arbor.ee.ntu.edu.tw/~chyun/dmpaper/huanet98.pd  
+- Python implementation of k-modes clustering algorithm for categorical data: https://github.com/nicodv/kmodes#id1  
+- HOMER Energy: http://homerenergy.com/
