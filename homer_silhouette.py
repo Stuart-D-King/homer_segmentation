@@ -8,13 +8,17 @@ from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.mixture import GaussianMixture
 from homer_cluster import one_hot, prep_kmodes
 import pdb
-import boto3
-import os
 
 
 def plot_silhouette(df, X, n_clusters, model='KM'):
     '''
-    df: must be dense array or pandas dataframe
+    Plot silhouette sample scores for input dataframe.
+
+    :param df: dataframe to cluster
+    :param X: dense binary array for silhouette scoring
+    :param n_clusters: number of clusters for model to cluster data into
+    :param model: the clustering algorithm to be applied to the data, default = 'KM' (k-modes)
+    :returns: None, saved plot of silhouette sample scores for each cluster
     '''
     fig = plt.figure(figsize=(8,6))
     ax = fig.add_subplot(111)
@@ -73,12 +77,17 @@ def plot_silhouette(df, X, n_clusters, model='KM'):
     plt.title('Silhouette analysis for {} with {} clusters'.format(clusterer.__class__.__name__, n_clusters))
 
     plt.savefig('sil_{}_{}.png'.format(clusterer.__class__.__name__, n_clusters), dpi=200)
-
     plt.close()
 
-def get_silhouette_score(df, X, n_clusters, model='AG'):
+def get_silhouette_score(df, X, n_clusters, model='KM'):
     '''
-    X: must be dense array or pandas dataframe
+    Calculate silhouette score for clustered dataframe.
+
+    :param df: dataframe to cluster
+    :param X: dense binary array for silhouette scoring
+    :param n_clusters: number of clusters for model to cluster data into
+    :param model: the clustering algorithm to be applied to the data, default = 'KM' (k-modes)
+    :returns: silhouette score
     '''
     # Initialize clusterer and set random state, if possible
     if model == 'AG':
@@ -99,11 +108,18 @@ def get_silhouette_score(df, X, n_clusters, model='AG'):
     return sil_avg
 
 def plot_sil_scores(df, X, model):
+    '''
+    Plot silhouette scores for cluster models based on the number of clusters for each model.
+
+    :param df: dataframe to cluster
+    :param X: dense binary array for silhouette scoring
+    :param model: the clustering algorithm to be applied to the data
+    '''
     fig = plt.figure(figsize=(8,6))
     ax = fig.add_subplot(111)
 
-    sil_scores = [get_silhouette_score(df, X, i, model) for i in range(3,9)]
-    ax.plot(range(3,9), sil_scores)
+    sil_scores = [get_silhouette_score(df, X, i, model) for i in range(2,9)]
+    ax.plot(range(2,9), sil_scores)
     ax.set_xlabel('Number of Clusters')
     ax.set_ylabel('Silhouette Score')
     plt.title('Silhouette Score vs. Number of Clusters')
@@ -111,24 +127,12 @@ def plot_sil_scores(df, X, model):
     plt.savefig('sil_v_clust_{}.png'.format(model), dpi=200)
     plt.close()
 
-def to_bucket(f, bucket, write_name):
-    '''
-    Write files to s3 bucket.
-    INPUT: f - file to write
-           bucket - bucket to write to
-           write_name - name for S3
-    '''
-    # Specify the service
-    s3 = boto3.resource('s3')
-    data = open(f, 'rb')
-    s3.Bucket(bucket).put_object(Key=write_name, Body=data)
-    print('Success! {} added to {} bucket'.format(write_name, bucket))
 
 if __name__ == '__main__':
     plt.close('all')
 
-    df = pd.read_pickle('data/df.pkl')
     # df_users = pd.read_pickle('data/df_users.pkl')
+    df = pd.read_pickle('data/df.pkl')
 
     # df_users_km = prep_kmodes(df_users)
     df_km = prep_kmodes(df)
@@ -137,8 +141,6 @@ if __name__ == '__main__':
     # X_users = one_hot(df_users)
 
     for i in range(2, 9):
-        plt = plot_silhouette(df_km, X.todense(), n_clusters=i, model='KM')
-        # cluster_and_plot(X_users.toarray(), n_clusters=i, model='AG')
+        plot_silhouette(df_km, X.todense(), n_clusters=i, model='KM')
 
     plot_sil_scores(df_km, X.todense(), model='KM')
-    # plot_sil_scores(X_users.toarray(), model='AG')
