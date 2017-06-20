@@ -310,27 +310,28 @@ def choropleth_map(df, c_num=0):
 
     m.save('img/maps/choro_map.html')
 
-def marker_cluster_map(df_, country, c_num=0):
+def marker_cluster_map(df_, country, cluster=0):
     '''
     Create a marker cluster map of simulations in a particular country.
 
     :param df: dataframe from which data is pulled
     :param country: country for which to map simulations
-    :param c_num: the cluster to map; default = 0, which means all clusters are mapped
+    :param cluster: the cluster to map; default = 0, which means all clusters are mapped
     '''
     centers = pd.read_pickle('data/centers.pkl')
 
-    df = df[df['Country'] == country]
-    if c_num != 0:
-        df = df[df['Cluster'] == cluster]
+    df = df_[df_['Country'] == country]
+    if cluster != 0:
+        df = df_[df_['Cluster'] == cluster]
 
     center_lat = centers.loc[centers['ISO3136'] == country, 'LAT'].tolist()[0]
     center_lng = centers.loc[centers['ISO3136'] == country, 'LONG'].tolist()[0]
 
-    m = folium.Map(location=[center_lat, center_lng], zoom_start=6, control_scale=True)
+    m = folium.Map(location=[center_lat, center_lng], zoom_start=6, max_zoom=10, control_scale=True)
 
     # create a marker cluster
     marker_cluster = folium.MarkerCluster('Simulations Cluster').add_to(m)
+    # force_zoom = L.markerClusterGroup(options)
 
     latitude = df.Latitude.values
     longitude = df.Longitude.values
@@ -362,4 +363,4 @@ if __name__ == '__main__':
 
     # MAPS!!
     # choropleth_map(df_usa)
-    # marker_cluster_map(df, 'DE', 2)
+    marker_cluster_map(df, 'DE', 3)

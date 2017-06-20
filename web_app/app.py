@@ -110,7 +110,7 @@ def marker_cluster_map(df, country, c_num):
     center_lat = centers.loc[centers['ISO3136'] == country, 'LAT'].tolist()[0]
     center_lng = centers.loc[centers['ISO3136'] == country, 'LONG'].tolist()[0]
 
-    m = folium.Map(location=[center_lat, center_lng], zoom_start=5.5, control_scale=True)
+    m = folium.Map(location=[center_lat, center_lng], zoom_start=5.5, max_zoom=10, control_scale=True)
 
     # create a marker cluster
     marker_cluster = folium.MarkerCluster('Simulations Cluster').add_to(m)
