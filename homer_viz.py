@@ -11,6 +11,11 @@ import scipy.stats as scs
 import pdb
 
 def bar_charts(df):
+    '''
+    Create bar chart graph of ImportedWind, ImportedSolar, and Sample variables.
+
+    :param df: dataframe from which data is pulled
+    '''
     cols = ['ImportedWind', 'ImportedSolar', 'Sample']
     clusters = np.unique(df['Cluster'])
     fig, axes = plt.subplots(1,3,figsize=(10,3.5))
@@ -28,6 +33,11 @@ def bar_charts(df):
     plt.close()
 
 def heat_map_users(df):
+    '''
+    Create heat map of the number of simulations by user role and cluster.
+
+    :param df: dataframe from which data is pulled
+    '''
     fig = plt.figure(figsize=(8,4))
     ax = fig.add_subplot(111)
     agg = df.groupby(['Cluster', 'UserRole'])['NumSims'].mean()
@@ -40,6 +50,11 @@ def heat_map_users(df):
     plt.close()
 
 def heat_map_sims(df):
+    '''
+    Create heat map of the total number of simulations by cluster using DefaultGenerator variable.
+
+    :param df: dataframe from which data is pulled
+    '''
     fig = plt.figure(figsize=(8,4))
     ax = fig.add_subplot(111)
     agg = df.groupby(['Cluster', 'DefaultGenerator'])['DefaultGenerator'].count()
@@ -51,6 +66,11 @@ def heat_map_sims(df):
     plt.show()
 
 def count_sims_cluster(df):
+    '''
+    Create horizontal bar chart of the number of simulations by cluster.
+
+    :param df: dataframe from which data is pulled
+    '''
     fig = plt.figure(figsize=(8,4))
     ax = fig.add_subplot(111)
     sns.countplot(y='Cluster', data=df, ax=ax, color="c")
@@ -65,6 +85,11 @@ def count_sims_cluster(df):
     plt.close()
 
 def count_user_cluster(df):
+    '''
+    Create stacked horizontal bar chart of the number of simulations by cluster and UserRole.
+
+    :param df: dataframe from which data is pulled
+    '''
     fig = plt.figure(figsize=(8,6))
     ax = fig.add_subplot(111)
     sns.countplot(x='Cluster', hue='UserRole', data=df, palette="Greens_d", ax=ax)
@@ -73,10 +98,15 @@ def count_user_cluster(df):
     plt.show()
 
 def hist_sims(df):
+    '''
+    Create histogram of the number of simulations with outliers (+/- 3 standard deviations) removed.
+
+    :param df: dataframe from which data is pulled
+    '''
     sims = df['NumSims'].values
     mu = sims.mean()
     std = sims.std()
-    sims = [s for s in sims if s <= mu + std and s >= mu - std]
+    sims = [s for s in sims if s <= mu + (std*3) and s >= mu - (std*3)]
 
     fig = plt.figure(figsize=(8,6))
     ax = fig.add_subplot(111)
@@ -89,6 +119,11 @@ def hist_sims(df):
     plt.close()
 
 def time_series(df):
+    '''
+    Create time series line graph of the number of simulations each day from April 2014 to April 2017.
+
+    :param df: dataframe from which data is pulled
+    '''
     fig = plt.figure(figsize=(12,6))
     ax = fig.add_subplot(111)
 
@@ -99,6 +134,11 @@ def time_series(df):
     plt.show()
 
 def time_hist(df):
+    '''
+    Create histogram of the number of simulations per day from April 2014 to April 2017.
+
+    :param df: dataframe from which data is pulled
+    '''
     fig = plt.figure(figsize=(12,6))
     ax = fig.add_subplot(111)
 
@@ -115,6 +155,11 @@ def time_hist(df):
     plt.show()
 
 def weekday_weekend(df_):
+    '''
+    Create a weekday and weekend histogram for each cluster.
+
+    :param df: dataframe from which data is pulled
+    '''
     clusters = [1,2,3,4]
     fig, axes = plt.subplots(2,2,figsize=(8,8))
     for ax, c in zip(axes.ravel(), clusters):
@@ -148,13 +193,16 @@ def weekday_weekend(df_):
     plt.savefig('img/weekday_weekend.png', dpi=200)
 
 def cluster_bars_org(df):
+    '''
+    Create bar chart of the number of simulations by organization type in each cluster.
+
+    :param df: dataframe from which data is pulled
+    '''
     # categorical vs categorical vs numeric
     agg = df.groupby(['Cluster', 'OrganizationType'])['OrganizationType'].count()
     agg = agg.unstack(level='OrganizationType')
     fig, ax = plt.subplots(1, 1, figsize=(10, 4))
     agg.plot(kind='bar', ax=ax).set_ylabel('Simulations')
-
-    # ax.set_yticklabels(ax.get_yticklabels(), fontsize=14)
 
     plt.title('Number of Simulations by Cluster and Organization Type', fontsize=16)
 
@@ -167,6 +215,11 @@ def cluster_bars_org(df):
     plt.close()
 
 def cluster_bars_user(df):
+    '''
+    Create bar chart of the number of simulations by user role in each cluster.
+
+    :param df: dataframe from which data is pulled
+    '''
     # categorical vs categorical vs numeric
     agg = df.groupby(['Cluster', 'UserRole'])['UserRole'].count()
     agg = agg.unstack(level='UserRole')
@@ -179,6 +232,7 @@ def cluster_bars_user(df):
     plt.xticks(rotation='horizontal')
     # ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fontsize=16, fancybox=True, shadow=True, ncol=4)
 
+    # ax.tick_params(labelsize=14)
     ax.set_xlabel('')
     plt.legend(loc='best', fontsize=18)
     plt.tight_layout()
@@ -186,6 +240,12 @@ def cluster_bars_user(df):
     plt.close()
 
 def marker_map(df, c_num=0):
+    '''
+    Create a marker map of for where each simulation is run.
+
+    :param df: dataframe from which data is pulled
+    :param c_num: the cluster to map; default = 0, which means all clusters are mapped
+    '''
     if c_num != 0:
         df = df[df['Cluster'] == cluster]
 
@@ -205,6 +265,12 @@ def marker_map(df, c_num=0):
 
 
 def choropleth_map(df, c_num=0):
+    '''
+    Create a choropleth (heat map) of simulations in the United States by county.
+
+    :param df: dataframe from which data is pulled (should be a dataframe of U.S. simulations)
+    :param c_num: the cluster to map; default = 0, which means all clusters are mapped
+    '''
     if c_num != 0:
         df = df[df['Cluster'] == cluster]
 
@@ -225,6 +291,9 @@ def choropleth_map(df, c_num=0):
     simsdata = simsdata.reset_index()
     simsdata.columns = ['ID', 'Number']
 
+    simsrange = np.max(simsdata['Number']) - 0
+    threshold_scale = [0, simsrange*.2, simsrange*.4, simsrange*.6, simsrange*.8, np.max(simsdata['Number'])]
+
     county_geo = r'data/us_counties_20m_topo.json'
 
     m = folium.Map(location=[48, -99], zoom_start=4)
@@ -232,6 +301,7 @@ def choropleth_map(df, c_num=0):
                     data=simsdata,
                     columns=['ID', 'Number'],
                     key_on='feature.id',
+                    threshold_scale=threshold_scale,
                     fill_color='PuRd',
                     fill_opacity=0.7,
                     line_opacity=0.3,
@@ -241,6 +311,13 @@ def choropleth_map(df, c_num=0):
     m.save('img/maps/choro_map.html')
 
 def marker_cluster_map(df_, country, c_num=0):
+    '''
+    Create a marker cluster map of simulations in a particular country.
+
+    :param df: dataframe from which data is pulled
+    :param country: country for which to map simulations
+    :param c_num: the cluster to map; default = 0, which means all clusters are mapped
+    '''
     centers = pd.read_pickle('data/centers.pkl')
 
     df = df[df['Country'] == country]
@@ -268,20 +345,21 @@ def marker_cluster_map(df_, country, c_num=0):
 if __name__ == '__main__':
     plt.close('all')
     df = pd.read_pickle('data/df_clustered.pkl')
-    # df_usa = pd.read_pickle('data/df_usa.pkl')
+    df_usa = pd.read_pickle('data/df_usa.pkl')
+    # df_users = pd.read_pickle('data/df_users.pkl')
 
-    # marker_cluster_map(df)
+    # bar_charts(df)
     # count_sims_cluster(df)
     # count_user_cluster(df)
-    # bar_charts(df)
     # heat_map_users(df_users)
     # heat_map_sims(df)
     # hist_sims(df_users)
-    # hist_changed_inputs(df_users)
     # time_series(df)
     # time_hist(df)
     # weekday_weekend(df)
+    # cluster_bars_user(df)
+    # cluster_bars_org(df)
+
+    # MAPS!!
     # choropleth_map(df_usa)
     # marker_cluster_map(df, 'DE', 2)
-    cluster_bars_user(df)
-    # cluster_bars_org(df)

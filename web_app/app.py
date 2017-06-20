@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, send_file
+from flask import Flask, request, render_template
 import pandas as pd
 import numpy as np
 import folium
@@ -9,6 +9,7 @@ df = pd.read_pickle('../data/df_clustered.pkl')
 C1, C2, C3, C4 = df[df['Cluster'] == 1], df[df['Cluster'] == 2], df[df['Cluster'] == 3], df[df['Cluster'] == 4]
 
 def user_counts(df):
+    '''Create html-friendly dataframe of the number of simulations for each user role type'''
     grps = df.UserRole.value_counts(dropna=False)
     pct = [x / float(sum(grps)) for x in grps]
     s1 = pd.Series(grps.values, index=grps.index, name='Count')
@@ -18,6 +19,7 @@ def user_counts(df):
     return df_grp.to_html()
 
 def org_counts(df):
+    '''Create html-friendly dataframe of the number of simulations for each organization type'''
     grps = df.OrganizationType.value_counts(dropna=False)
     pct = [x / float(sum(grps)) for x in grps]
 
@@ -28,6 +30,7 @@ def org_counts(df):
     return df_grp.to_html()
 
 def search_space_counts(col):
+    '''Create html-friendly dataframe segmented by cluster for the use/non-use of multiple equipment search for a particular variable'''
     frames = []
     clusters = [C1, C2, C3, C4]
     for idx, cluster in enumerate(clusters):
@@ -55,6 +58,7 @@ def search_space_counts(col):
     return df.to_html()
 
 def choropleth_map(cluster=0):
+    '''Create heat map of simulations by county in the United States for a particular cluster'''
     df = pd.read_pickle('../data/df_usa.pkl')
     if cluster != 0:
         df = df[df['Cluster'] == cluster]
@@ -93,10 +97,10 @@ def choropleth_map(cluster=0):
                     legend_name='Number of Simulations',
                     topojson='objects.us_counties_20m')
 
-    # m.save('static/img/choro_map.html')
     m.save('templates/choro_map.html')
 
 def marker_cluster_map(df, country, c_num):
+    '''Create a marker cluster map of simulations for a cluster in a pre-defined country'''
     df = df[df['Country'] == country]
     if c_num != 0:
         df = df[df['Cluster'] == c_num]
@@ -118,10 +122,10 @@ def marker_cluster_map(df, country, c_num):
     for idx, (lat, lng) in enumerate(lat_lng):
         folium.Marker(location=[lat, lng]).add_to(marker_cluster)
 
-    # m.save('static/img/marker_cluster.html')
     m.save('templates/marker_cluster.html')
 
 def usersims_by_cluster(df):
+    '''Create html-friendly dataframe with summary statistics for each cluster'''
     pt = pd.pivot_table(df, values=['Created'], index=['User'], columns=['Cluster'], aggfunc='count', fill_value=0)
 
     cluster_df = pd.DataFrame(pt.iloc[:, 0].index)
@@ -156,7 +160,6 @@ def show_choro_map():
     choropleth_map(cluster)
 
     return render_template('choro_map.html')
-    # return send_file('static/img/choro_map.html')
 
 # marker map page
 @app.route('/marker_map', methods=['POST'])
@@ -166,7 +169,6 @@ def show_marker_map():
     marker_cluster_map(df, country, c_num)
 
     return render_template('marker_cluster.html')
-    # return send_file('static/img/marker_cluster.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8105, threaded=True)
