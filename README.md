@@ -191,7 +191,7 @@ Phase 4: Final Model and Feature Importance - Complete
 - Explore visualizations and feature importance methods for categorical datasets (e.g. Multiple Correspondence Analysis)
 - **Work product:** Working model with supporting visualizations to infer business intelligence
 
-Phase 5: Web Application and Presentation - Current
+Phase 5: Web Application and Presentation - Complete
 - Build Flask application to deploy on Amazon Web Services
 - Present findings and application at Galvanize and HOMER Energy
 - Outline next steps
