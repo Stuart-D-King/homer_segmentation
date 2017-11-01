@@ -34,8 +34,8 @@ Other unsupervised clustering algorithms were also tested on the data, including
 
 Once the cluster algorithm was selected, I needed to determine the appropriate amount of clusters to segment the data. In k-means clustering, it is common to perform a dimensionality reduction technique such as principle component analysis (PCA) to plot the resulting clusters in a two dimensional space to visually confirm clustering is taking place. However, because applying PCA to categorical data is generally regarded as unwise, I instead opted to calculate a silhouette score based on a hamming distance metric for a range of cluster quantities to settle on the most appropriate number of customer segments.  When calculating the silhouette coefficient, the best possible value is 1, indicating all data points are perfectly grouped and there are no overlapping clusters. A coefficient of 0 implies overlapping clusters, and negative values suggest that a sample has been assigned to the wrong cluster. Based on the below plot of scores, I decided to cluster my data into four clusters. I selected k=4 because the silhouette score was the highest for this number of clusters, and it made intuitive sense based on my understanding of HOMER's customer base.
 
-<img src="img/silhouette/sil_v_clust_KM.png" alt="sil_v_clust" width="525" height="425">
-<!-- ![silhouette_vs_k](img/silhouette/sil_v_clust_KM.png) -->
+<!-- <img src="img/silhouette/sil_v_clust_KM.png" alt="sil_v_clust" width="525" height="425"> -->
+![silhouette_vs_k](img/silhouette/sil_v_clust_KM.png)
 
 After selecting the appropriate number of clusters, I fitted the k-modes clustering algorithm to the data and assigned cluster labels to each simulation. I then performed exploratory data analysis to begin extracting meaningful business intelligence from the clusters.
 
@@ -62,23 +62,23 @@ Service    | 16545|  2.08
 
 After assigning cluster labels to each user using k-modes, we can see that the total number of simulations is fairly well distributed among the four clusters, with a larger share going to Cluster 1 and a smaller share to Cluster 2.
 
-<img src="img/cluster_counts.png" alt="cluster_counts" width="500" height="250">
-<!-- ![cluster_counts](img/cluster_counts.png) -->
+<!-- <img src="img/cluster_counts.png" alt="cluster_counts" width="500" height="250"> -->
+![cluster_counts](img/cluster_counts.png)
 
 Looking at the distribution of user roles in each cluster, we can see that the model has split the user roles into particular clusters, but not exclusively into just one. Academic users are the majority it in Clusters 1 and 4, and technical users are more prevalent Clusters 2 and 3.
 
-<img src="img/sims_by_cluster_user.png" alt="sims_by_cluster_user" width="600" height="250">
-<!-- ![sims_by_cluster_user](img/sims_by_cluster_user.png) -->
+<!-- <img src="img/sims_by_cluster_user.png" alt="sims_by_cluster_user" width="600" height="250"> -->
+![sims_by_cluster_user](img/sims_by_cluster_user.png)
 
 Similarly, the distribution of organization type among the clusters aligns closely with the user role distributions. Academic institutions are the majority in Clusters 1 and 4, and engineering firms are most common in Clusters 2 and 3.
 
-<img src="img/sims_by_cluster_org.png" alt="sims_by_cluster_org" width="600" height="250">
-<!-- ![sims_by_cluster_org](img/sims_by_cluster_org.png) -->
+<!-- <img src="img/sims_by_cluster_org.png" alt="sims_by_cluster_org" width="600" height="250"> -->
+![sims_by_cluster_org](img/sims_by_cluster_org.png)
 
 To explore and extract additional information from the data, I also created weekday and weekend histograms of the number of simulations per day for each cluster. The resultant graphs suggest similar, but subtle differences between the four groups. While the number of simulations per day is on average highest during the week for all four clusters, we can see from the histograms for Cluster 1 that the frequency of simulations on the weekend does not differ as severely as compared to the other three groups. This could be due to the fact that there is large majority of academic users in this cluster, and students are more likely to run simulations over the weekend for school projects. Building on this analysis, Cluster 4, which also has a majority of academic users and organizations, appears to have relatively high kurtosis due to a few extreme deviations (outliers). While the weekend simulations seem to be infrequent in Cluster 4, there are a handful of days in which the cumulative sum of simulations have reached into the thousands. The true nature of these simulations likely requires further analysis to determine if the simulations are being run with project implementation in mind, or as part of academic research endeavor. Clusters 2 and 3 also suggest minimal weekend software usage, with Cluster 3 depicting a distribution suggestive of more model runs per day.
 
-<img src="img/weekday_weekend.png" alt="weekday_weekend" width="600" height="600">
-<!-- ![weekday_weekend](img/weekday_weekend.png) -->
+<!-- <img src="img/weekday_weekend.png" alt="weekday_weekend" width="600" height="600"> -->
+![weekday_weekend](img/weekday_weekend.png)
 
 Diving deeper into the number of simulations by cluster, the table below provides some insight into the frequency and variability at which users are interacting with the software in each cluster. Users in Cluster 1 have the highest average number of simulations, with Clusters 3 and 4 not far behind. Cluster 1 also has the greatest standard deviation, suggesting users in this cluster have the greatest variability in their interaction with the software. Users in Cluster 2 have the lowest average number of simulations, as well as the smallest standard deviation. It may be appropriate to classify these (on average) technical users as exploring the software's functionality, but not relying on it to extract actionable insights.
 
@@ -92,8 +92,8 @@ Other important input variables identified by HOMER are whether a user has impor
 
 The below bar graphs show the mean feature usage for imported solar, imported wind, and sample file in each cluster. For imported wind, we see that Cluster 2 simulations are the most likely to import this data, with just over 10 percent of simulations using imported wind data. For imported solar, all four clusters have a similar mean average for importing geographic-specific data. Interestingly enough, Clusters 2 and 3, the groups with the greatest proportion of technical users, have the highest average for using HOMER's sample file to run simulations. While HOMER considers the use of the sample file to be a negative indicator of simulation realness, it should be noted the relative usage in these clusters is still low at 1.25 and 1.75 percent of the time, respectfully.
 
-<img src="img/imports.png" alt="imports" width="600" height="200">
-<!-- ![imports](img/imports.png) -->
+<!-- <img src="img/imports.png" alt="imports" width="600" height="200"> -->
+![imports](img/imports.png)
 
 HOMER also considers the extent to which a simulation models a variety of microgrid parameters and configurations as a strong indicator of the simulation's realness. For each simulation, a user is able to specify what energy hardware (e.g. batteries, turbines, solar panels, etc.) she would like to model, as well a range of hardware specifications for the software to compare and output an optimized microgrid (optimization is defined by the the lowest net present cost of microgrid system). Per conversations with HOMER, a rough metric to judge a simulation's realness is whether the user provides more than two different hardware specifications to test. For this reason, I crafted a series of features that check whether a user modeled a certain piece of hardware, and if so, if the simulation tested multiple specifications/capacities for that particular hardware category.
 
@@ -145,7 +145,8 @@ NA   |           13420|             4.89|           85443|            84.05|    
 
 The below table provides an overview of general characteristics observed in each of the four clusters.
 
-<img src="img/icons/cluster_profiles.png" alt="icon_table" width="600" height="325">
+<!-- <img src="img/icons/cluster_profiles.png" alt="icon_table" width="600" height="325"> -->
+![cluster_profiles](img/icons/cluster_profiles.png)
 
 ### Mapping Simulations
 
@@ -161,8 +162,8 @@ Segmenting simulation runs is an important first step in understanding who is us
 ### Technology Stack
 The following software packages and technologies were used in this project.
 
-<img src="img/techstack.png" alt="techstack" width="500" height="500">
-<!-- ![tech_stack](img/techstack.png) -->
+<!-- <img src="img/techstack.png" alt="techstack" width="500" height="500"> -->
+![tech_stack](img/techstack.png)
 
 ### Project Development Outline
 Phase 1: Problem Framing - Complete
